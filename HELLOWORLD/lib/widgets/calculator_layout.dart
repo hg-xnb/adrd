@@ -7,6 +7,7 @@ class CalculatorLayout extends StatelessWidget {
   final TextEditingController input2Controller;
   final TextEditingController outputController;
   final VoidCallback onCalculate;
+  final VoidCallback onClear;
   final String result;
 
   const CalculatorLayout({
@@ -15,6 +16,7 @@ class CalculatorLayout extends StatelessWidget {
     required this.input2Controller,
     required this.outputController,
     required this.onCalculate,
+    required this.onClear,
     required this.result,
   });
 
@@ -24,12 +26,6 @@ class CalculatorLayout extends StatelessWidget {
 
     // Update outputController with result
     outputController.text = result;
-
-    void _clearInputOutput(){
-      input1Controller.text = "";
-      input2Controller.text = "";
-      outputController.text = "";
-    }
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -158,7 +154,7 @@ class CalculatorLayout extends StatelessWidget {
                 child: ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: screenWidth * 0.4),
                   child: ElevatedButton(
-                    onPressed: _clearInputOutput,
+                    onPressed: onClear,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.myColorPairs['clear-button']!,
                       foregroundColor: Colors.white,

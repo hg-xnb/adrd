@@ -53,6 +53,12 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void _clearInputOutput(){
+    _input1Controller.text = "";
+    _input2Controller.text = "";
+    _outputController.text = "";
+  }
+
   @override
   void dispose() {
     _input1Controller.dispose();
@@ -72,6 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
         input2Controller: _input2Controller,
         outputController: _outputController,
         onCalculate: _calculate,
+        onClear: _clearInputOutput,
         result: _result,
       ),
     );
