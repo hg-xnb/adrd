@@ -217,7 +217,7 @@ class Calculator {
     });
 
     if (isNumeric) {
-      _expression += '${_recentResult}!';
+      _expression += '$_recentResult!';
     } else {
       _expression += '0';
     }
