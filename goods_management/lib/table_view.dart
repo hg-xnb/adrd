@@ -9,6 +9,12 @@ class ProductTable extends StatelessWidget {
   final ProductList products;
   final Function(int) onEditClicked;
   final Function(int) onRemoveClicked;
+  final VoidCallback onSortByNameAscending;
+  final VoidCallback onSortByNameDescending;
+  final VoidCallback onSortByImportTimeAscending;
+  final VoidCallback onSortByImportTimeDescending;
+  final VoidCallback onSortByInfoAscending;
+  final VoidCallback onSortByInfoDescending;
 
   const ProductTable({
     super.key,
@@ -17,6 +23,12 @@ class ProductTable extends StatelessWidget {
     required this.products,
     required this.onEditClicked,
     required this.onRemoveClicked,
+    required this.onSortByNameAscending,
+    required this.onSortByNameDescending,
+    required this.onSortByImportTimeAscending,
+    required this.onSortByImportTimeDescending,
+    required this.onSortByInfoAscending,
+    required this.onSortByInfoDescending,
   });
 
   // Method to show product details in a dialog
@@ -102,32 +114,59 @@ class ProductTable extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Table Header
-            const Padding(
-              padding: EdgeInsets.all(8.0),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
                   Expanded(
                     flex: 4,
-                    child: Text(
-                      'Tên',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
+                    child: InkWell(
+                      onTap: () {
+                        // Toggle between ascending and descending
+                        // For simplicity, alternate calls; parent can track state
+                        onSortByNameAscending();
+                      },
+                      onDoubleTap: () {
+                        // Double tap for descending sort
+                        onSortByNameDescending();
+                      },
+                      child: const Text(
+                        'Tên',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.start,
+                      ),
                     ),
                   ),
                   Expanded(
                     flex: 3,
-                    child: Text(
-                      'Nhập kho',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
+                    child: InkWell(
+                      onTap: () {
+                        onSortByImportTimeAscending();
+                      },
+                      onDoubleTap: () {
+                        onSortByImportTimeDescending();
+                      },
+                      child: const Text(
+                        'Nhập kho',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.start,
+                      ),
                     ),
                   ),
                   Expanded(
                     flex: 3,
-                    child: Text(
-                      'Thông tin',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.start,
+                    child: InkWell(
+                      onTap: () {
+                        onSortByInfoAscending();
+                      },
+                      onDoubleTap: () {
+                        onSortByInfoDescending();
+                      },
+                      child: const Text(
+                        'Thông tin',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.start,
+                      ),
                     ),
                   ),
                 ],

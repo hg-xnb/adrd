@@ -90,8 +90,6 @@ class Product {
   int get hashCode => productID.hashCode;
 }
 
-
-
 class ProductList {
   final List<Product> _products = [];
 
@@ -104,7 +102,7 @@ class ProductList {
 
   // Method to add a product
   void addProduct(Product product) {
-    //check if the product is already in the list
+    // Check if the product is already in the list
     if (_products.any((p) => p.productID == product.productID)) {
       throw ArgumentError("Product with this ID already exists");
     }
@@ -128,7 +126,7 @@ class ProductList {
         .toList();
   }
 
-  // Getter to get all products.  This returns a copy to prevent external modification.
+  // Getter to get all products. This returns a copy to prevent external modification.
   List<Product> get allProducts {
     return [..._products];
   }
@@ -159,6 +157,55 @@ class ProductList {
       return _products[index];
     }
     return null; // Return null if the index is out of bounds
+  }
+
+  // Sorting methods to match ProductTable's onSort callbacks
+  void sortByNameAscending() {
+    _products.sort((a, b) {
+      final aName = a.name ?? '';
+      final bName = b.name ?? '';
+      return aName.compareTo(bName);
+    });
+  }
+
+  void sortByNameDescending() {
+    _products.sort((a, b) {
+      final aName = a.name ?? '';
+      final bName = b.name ?? '';
+      return bName.compareTo(aName);
+    });
+  }
+
+  void sortByImportTimeAscending() {
+    _products.sort((a, b) {
+      final aTime = a.importTime ?? DateTime(0);
+      final bTime = b.importTime ?? DateTime(0);
+      return aTime.compareTo(bTime);
+    });
+  }
+
+  void sortByImportTimeDescending() {
+    _products.sort((a, b) {
+      final aTime = a.importTime ?? DateTime(0);
+      final bTime = b.importTime ?? DateTime(0);
+      return bTime.compareTo(aTime);
+    });
+  }
+
+  void sortByInfoAscending() {
+    _products.sort((a, b) {
+      final aInfo = a.info ?? '';
+      final bInfo = b.info ?? '';
+      return aInfo.compareTo(bInfo);
+    });
+  }
+
+  void sortByInfoDescending() {
+    _products.sort((a, b) {
+      final aInfo = a.info ?? '';
+      final bInfo = b.info ?? '';
+      return bInfo.compareTo(aInfo);
+    });
   }
 }
 

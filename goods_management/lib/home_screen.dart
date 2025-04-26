@@ -28,7 +28,14 @@ class HomeScreen extends StatelessWidget {
               products: productList, 
               heightTable: screenHeight - 205,
               onEditClicked: (int index){},
-              onRemoveClicked: (int index){}),
+              onRemoveClicked: (int index){},
+              onSortByImportTimeAscending: (){},
+              onSortByImportTimeDescending: (){},
+              onSortByInfoAscending: (){},
+              onSortByInfoDescending: (){},
+              onSortByNameAscending: (){},
+              onSortByNameDescending: (){},
+              ),
             const SizedBox(height: 16), // Added some spacing at the bottom
             Padding(
               padding: const EdgeInsets.all(16.0),
