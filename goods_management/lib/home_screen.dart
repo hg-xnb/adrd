@@ -36,7 +36,7 @@ class HomeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
-                    onPressed: () => Navigator.pushNamed(context, '/scan'),
+                    onPressed: () => Navigator.pushNamed(context, '/scanQRCode'),
                     child: const Text(
                       'Quét mã QR',
                       style: TextStyle(color: Color(0xFF006A71)),

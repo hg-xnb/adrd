@@ -19,6 +19,68 @@ class ProductTable extends StatelessWidget {
     required this.onRemoveClicked,
   });
 
+  // Method to show product details in a dialog
+  void _showProductDetails(BuildContext context, Product? product, int index) {
+    if (product == null) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(product.name ?? 'No Name'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('ID: ${product.productID ?? 'N/A'}'),
+              Text('Origin: ${product.origin ?? 'N/A'}'),
+              Text('Info: ${product.info ?? 'N/A'}'),
+              Text('Price: ${product.price?.toString() ?? 'N/A'}'),
+              Text('Category: ${product.category ?? 'N/A'}'),
+              Text('Import Time: ${product.importTime?.toString() ?? 'N/A'}'),
+              Text('Export Time: ${product.exportTime?.toString() ?? 'N/A'}'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Method to show context menu on long press
+  void _showContextMenu(BuildContext context, Offset position, int index) {
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+    showMenu(
+      context: context,
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(position.dx, position.dy, 0, 0),
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        const PopupMenuItem(
+          value: MenuAction.edit,
+          child: Text('Edit'),
+        ),
+        const PopupMenuItem(
+          value: MenuAction.remove,
+          child: Text('Remove'),
+        ),
+      ],
+    ).then((value) {
+      if (value == MenuAction.edit) {
+        onEditClicked(index);
+      } else if (value == MenuAction.remove) {
+        onRemoveClicked(index);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final parentWidth = MediaQuery.of(context).size.width;
@@ -30,8 +92,8 @@ class ProductTable extends StatelessWidget {
     return Container(
       alignment: Alignment.topCenter,
       margin: EdgeInsets.only(
-        left: 0.065 * tableWidth,
-        right: 0.065 * tableHeight,
+        left: 0.0 * tableWidth,
+        right: 0.0 * tableHeight,
       ),
       child: SizedBox(
         width: tableWidth,
@@ -68,7 +130,6 @@ class ProductTable extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  SizedBox(width: 40), // Space for menu button
                 ],
               ),
             ),
@@ -79,38 +140,37 @@ class ProductTable extends StatelessWidget {
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   final product = products.getElementAtIndex(index);
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Expanded(flex: 4, child: Text(product?.name ?? '')),
-                        Expanded(
-                          flex: 3,
-                          child: Text(product?.importTime.toString() ?? ''),
-                        ),
-                        Expanded(flex: 3, child: Text(product?.info ?? '')),
-
-                        PopupMenuButton<MenuAction>(
-                          onSelected: (action) {
-                            if (action == MenuAction.edit) {
-                              onEditClicked(index);
-                            } else if (action == MenuAction.remove) {
-                              onRemoveClicked(index);
-                            }
-                          },
-                          itemBuilder:
-                              (context) => [
-                                const PopupMenuItem(
-                                  value: MenuAction.edit,
-                                  child: Text('Edit'),
-                                ),
-                                const PopupMenuItem(
-                                  value: MenuAction.remove,
-                                  child: Text('Remove'),
-                                ),
-                              ],
-                        ),
-                      ],
+                  return GestureDetector(
+                    onTap: () => _showProductDetails(context, product, index),
+                    onLongPressStart: (details) =>
+                        _showContextMenu(context, details.globalPosition, index),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 4,
+                            child: Text(
+                              product?.name ?? '',
+                              textAlign: TextAlign.start,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              product?.importTime.toString() ?? '',
+                              textAlign: TextAlign.start,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              product?.info ?? '',
+                              textAlign: TextAlign.start,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
