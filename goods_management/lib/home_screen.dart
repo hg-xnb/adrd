@@ -12,44 +12,54 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
 
   void _editProduct(int index) {
+    Navigator.pushNamed(
+      context,
+      '/productProperties',
+      arguments: index, // Pass your Product object here
+    );
   }
 
   void _removeProduct(int index) {
     setState(() {
+      productList.removeByIndex(index);
     });
   }
 
   void _sortByImportTimeAscending() {
     setState(() {
+      productList.sortByImportTimeAscending();
     });
   }
 
   void _sortByImportTimeDescending() {
     setState(() {
+      productList.sortByImportTimeDescending();
     });
   }
 
   void _sortByInfoAscending() {
     setState(() {
+      productList.sortByInfoAscending();
     });
   }
 
   void _sortByInfoDescending() {
     setState(() {
+      productList.sortByInfoDescending();
     });
   }
 
   void _sortByNameAscending() {
     setState(() {
+      productList.sortByNameAscending();
     });
   }
 
   void _sortByNameDescending() {
     setState(() {
+      productList.sortByNameDescending();
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             ProductTable(
               products: productList,
-              heightTable: screenHeight - 205,
+              heightTable: screenHeight - 225,
               onEditClicked: _editProduct,
               onRemoveClicked: _removeProduct,
               onSortByImportTimeAscending: _sortByImportTimeAscending,
@@ -89,14 +99,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
-                    onPressed: () => Navigator.pushNamed(context, '/scanQRCode'),
+                    onPressed:
+                        () => Navigator.pushNamed(context, '/scanQRCode'),
                     child: const Text(
                       'Quét mã QR',
                       style: TextStyle(color: Color(0xFF006A71)),
                     ),
                   ),
                   ElevatedButton(
-                    onPressed: () => Navigator.pushNamed(context, '/addProduct'),
+                    onPressed:
+                        () => Navigator.pushNamed(context, '/addProduct'),
                     child: const Text(
                       'Thêm Sản Phẩm',
                       style: TextStyle(color: Color(0xFF006A71)),

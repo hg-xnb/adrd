@@ -55,8 +55,10 @@ class Product {
       'price': price,
       'productID': productID,
       'category': category, // Add Category to the map
-      'importTime': importTime?.toIso8601String(), // Convert DateTime to String for map
-      'exportTime': exportTime?.toIso8601String(), // Convert DateTime to String for map
+      'importTime':
+          importTime?.toIso8601String(), // Convert DateTime to String for map
+      'exportTime':
+          exportTime?.toIso8601String(), // Convert DateTime to String for map
     };
   }
 
@@ -69,8 +71,14 @@ class Product {
       price: map['price']?.toDouble(),
       productID: map['productID'],
       category: map['category'], // Read Category from the map
-      importTime: map['importTime'] != null ? DateTime.parse(map['importTime']) : null, // Parse String to DateTime
-      exportTime: map['exportTime'] != null ? DateTime.parse(map['exportTime']) : null, // Parse String to DateTime
+      importTime:
+          map['importTime'] != null
+              ? DateTime.parse(map['importTime'])
+              : null, // Parse String to DateTime
+      exportTime:
+          map['exportTime'] != null
+              ? DateTime.parse(map['exportTime'])
+              : null, // Parse String to DateTime
     );
   }
 
@@ -109,6 +117,14 @@ class ProductList {
     _products.add(product);
   }
 
+  // Method to remove a product by index
+  void removeByIndex(int index) {
+    if (index < 0 || index >= _products.length) {
+      throw ArgumentError("Index out of bounds");
+    }
+    _products.removeAt(index);
+  }
+
   // Method to delete a product by ID
   void deleteProduct(String productID) {
     _products.removeWhere((product) => product.productID == productID);
@@ -116,13 +132,18 @@ class ProductList {
 
   // Method to find a product by ID
   Product? findProductByID(String productID) {
-    return _products.firstWhereOrNull((product) => product.productID == productID);
+    return _products.firstWhereOrNull(
+      (product) => product.productID == productID,
+    );
   }
 
   // Method to find products by name (case-insensitive)
   List<Product> findProductsByName(String name) {
     return _products
-        .where((product) => product.name?.toLowerCase().contains(name.toLowerCase()) ?? false)
+        .where(
+          (product) =>
+              product.name?.toLowerCase().contains(name.toLowerCase()) ?? false,
+        )
         .toList();
   }
 
@@ -145,7 +166,12 @@ class ProductList {
 
   // Method to count the number of products in a specific category
   int countProductsFromCategory(String category) {
-    return _products.where((product) => product.category?.toLowerCase() == category.toLowerCase()).length;
+    return _products
+        .where(
+          (product) =>
+              product.category?.toLowerCase() == category.toLowerCase(),
+        )
+        .length;
   }
 
   // Getter to get the length of the product list
@@ -317,12 +343,25 @@ List<Product> allProducts = [
       origin: ["USA", "China", "Japan", "Germany", "India"][i % 5],
       info: "Some information about product $i",
       price: double.tryParse((i * 5.55).toStringAsFixed(2)),
-      productID: DateTime.now().millisecondsSinceEpoch.toString() + i.toString(),
-      category: ["Electronics", "Fashion", "Books", "Appliances", "Other"][i % 5],
-      importTime: DateTime(2020 + (i % 5), i % 12 + 1, i % 28 + 1, i % 24, i % 60),
-      exportTime: DateTime(2021 + (i % 5), i % 12 + 1, i % 28 + 1, i % 24, i % 60 + 15),
+      productID:
+          DateTime.now().millisecondsSinceEpoch.toString() + i.toString(),
+      category:
+          ["Electronics", "Fashion", "Books", "Appliances", "Other"][i % 5],
+      importTime: DateTime(
+        2020 + (i % 5),
+        i % 12 + 1,
+        i % 28 + 1,
+        i % 24,
+        i % 60,
+      ),
+      exportTime: DateTime(
+        2021 + (i % 5),
+        i % 12 + 1,
+        i % 28 + 1,
+        i % 24,
+        i % 60 + 15,
+      ),
     ),
 ];
-
 
 ProductList productList = ProductList(initialProducts: allProducts);
