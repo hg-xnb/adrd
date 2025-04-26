@@ -2,8 +2,54 @@ import 'package:flutter/material.dart';
 import 'new_definations.dart';
 import 'table_view.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+
+  void _editProduct(int index) {
+  }
+
+  void _removeProduct(int index) {
+    setState(() {
+    });
+  }
+
+  void _sortByImportTimeAscending() {
+    setState(() {
+    });
+  }
+
+  void _sortByImportTimeDescending() {
+    setState(() {
+    });
+  }
+
+  void _sortByInfoAscending() {
+    setState(() {
+    });
+  }
+
+  void _sortByInfoDescending() {
+    setState(() {
+    });
+  }
+
+  void _sortByNameAscending() {
+    setState(() {
+    });
+  }
+
+  void _sortByNameDescending() {
+    setState(() {
+    });
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +63,7 @@ class HomeScreen extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
         ),
         backgroundColor: const Color(0xFF006A71),
-      ), // Changed app bar title
+      ),
       body: Container(
         alignment: Alignment.topCenter,
         width: screenWidth,
@@ -25,18 +71,18 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ProductTable(
-              products: productList, 
+              products: productList,
               heightTable: screenHeight - 205,
-              onEditClicked: (int index){},
-              onRemoveClicked: (int index){},
-              onSortByImportTimeAscending: (){},
-              onSortByImportTimeDescending: (){},
-              onSortByInfoAscending: (){},
-              onSortByInfoDescending: (){},
-              onSortByNameAscending: (){},
-              onSortByNameDescending: (){},
-              ),
-            const SizedBox(height: 16), // Added some spacing at the bottom
+              onEditClicked: _editProduct,
+              onRemoveClicked: _removeProduct,
+              onSortByImportTimeAscending: _sortByImportTimeAscending,
+              onSortByImportTimeDescending: _sortByImportTimeDescending,
+              onSortByInfoAscending: _sortByInfoAscending,
+              onSortByInfoDescending: _sortByInfoDescending,
+              onSortByNameAscending: _sortByNameAscending,
+              onSortByNameDescending: _sortByNameDescending,
+            ),
+            const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -50,14 +96,12 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   ElevatedButton(
-                    onPressed:
-                        () => Navigator.pushNamed(context, '/addProduct'),
+                    onPressed: () => Navigator.pushNamed(context, '/addProduct'),
                     child: const Text(
                       'Thêm Sản Phẩm',
                       style: TextStyle(color: Color(0xFF006A71)),
                     ),
                   ),
-                  // Removed the "Tất Cả Sản Phẩm" button as we are already on that screen
                 ],
               ),
             ),

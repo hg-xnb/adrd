@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'add_new_product.dart';
 import 'home_screen.dart';
 import 'scan_screen.dart';
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
