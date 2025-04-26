@@ -92,8 +92,8 @@ class ProductTable extends StatelessWidget {
     return Container(
       alignment: Alignment.topCenter,
       margin: EdgeInsets.only(
-        left: 0.0 * tableWidth,
-        right: 0.0 * tableHeight,
+        left: 0.01 * tableWidth,
+        right: 0.01 * tableHeight,
       ),
       child: SizedBox(
         width: tableWidth,
@@ -111,7 +111,7 @@ class ProductTable extends StatelessWidget {
                     child: Text(
                       'Tên',
                       style: TextStyle(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
+                      textAlign: TextAlign.start,
                     ),
                   ),
                   Expanded(
@@ -119,7 +119,7 @@ class ProductTable extends StatelessWidget {
                     child: Text(
                       'Nhập kho',
                       style: TextStyle(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
+                      textAlign: TextAlign.start,
                     ),
                   ),
                   Expanded(
@@ -127,7 +127,7 @@ class ProductTable extends StatelessWidget {
                     child: Text(
                       'Thông tin',
                       style: TextStyle(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
+                      textAlign: TextAlign.start,
                     ),
                   ),
                 ],
