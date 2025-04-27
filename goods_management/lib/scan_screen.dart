@@ -32,12 +32,12 @@ class _ScanScreenState extends State<ScanScreen> {
       '/productProperties',
       arguments: productList.allProducts.indexOf(newProduct),
     );
+    productList.removeByIndex(productList.allProducts.indexOf(newProduct));
 
     if (!mounted) return;
 
     if (result is Product) {
       setState(() {
-        productList.removeByIndex(productList.allProducts.indexOf(newProduct));
         productList.addProduct(result);
         _currentProduct = result; // Update lower panel
       });
@@ -72,7 +72,7 @@ class _ScanScreenState extends State<ScanScreen> {
               content: Text('Tạo sản phẩm mới với mã "$scannedCode"?'),
               actions: [
                 TextButton(
-                  onPressed: (){
+                  onPressed: () {
                     _handleNewProduct(scannedCode);
                   },
                   child: const Text('Thêm mới'),
@@ -99,7 +99,13 @@ class _ScanScreenState extends State<ScanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Quét QRCODE')),
+      appBar: AppBar(
+        title: const Text(
+          'Quét QRCODE',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+        ),
+        backgroundColor: const Color(0xFF006A71),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -185,7 +191,6 @@ class _ScanScreenState extends State<ScanScreen> {
     );
   }
 
-  // Panel showing current product info
   Widget _buildProductInfoPanel() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -199,15 +204,22 @@ class _ScanScreenState extends State<ScanScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildField('Mã sản phẩm', _currentProduct?.productID),
+                    const SizedBox(height: 8),
                     _buildField('Tên', _currentProduct?.name),
+                    const SizedBox(height: 8),
                     _buildField('Xuất xứ', _currentProduct?.origin),
+                    const SizedBox(height: 8),
                     _buildField('Thông tin', _currentProduct?.info),
+                    const SizedBox(height: 8),
                     _buildField('Giá', _currentProduct?.price?.toString()),
+                    const SizedBox(height: 8),
                     _buildField('Danh mục', _currentProduct?.category),
+                    const SizedBox(height: 8),
                     _buildField(
                       'Thời gian nhập',
                       _currentProduct?.importTime?.toString(),
                     ),
+                    const SizedBox(height: 8),
                     _buildField(
                       'Thời gian xuất',
                       _currentProduct?.exportTime?.toString(),
@@ -219,12 +231,17 @@ class _ScanScreenState extends State<ScanScreen> {
   }
 
   Widget _buildField(String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Text(
-        '$label: ${value ?? "Không có"}',
-        style: const TextStyle(fontSize: 16),
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
+        Expanded(
+          child: Text(
+            value ?? 'N/A',
+            style: const TextStyle(fontWeight: FontWeight.normal),
+          ),
+        ),
+      ],
     );
   }
 }

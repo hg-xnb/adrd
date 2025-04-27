@@ -27,7 +27,7 @@ class Product {
     info = info;
     price = price;
     category = category;
-    importTime = importTime??DateTime.now();
+    importTime = importTime ?? DateTime.now();
     exportTime = exportTime;
   }
 
@@ -249,8 +249,6 @@ class ProductList {
       return bCategory.compareTo(aCategory);
     });
   }
-
-
 }
 
 List<Product> allProducts = [
@@ -383,3 +381,7 @@ List<Product> allProducts = [
 ];
 
 ProductList productList = ProductList(initialProducts: allProducts);
+
+List<Map<String, double>> runningConfig = [
+  {"ac": 12.0},
+];

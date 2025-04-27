@@ -90,7 +90,13 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
     final totalGoods = widget.products.length;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Products Report')),
+      appBar: AppBar(
+        title: const Text(
+          'Thống kê sản phẩm',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+        ),
+        backgroundColor: const Color(0xFF006A71),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

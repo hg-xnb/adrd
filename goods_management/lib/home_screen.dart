@@ -148,9 +148,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   ElevatedButton(
                     onPressed:
-                        (){},
+                        () => Navigator.pushNamed(
+                          context,
+                          '/settingsUtilities',
+                          arguments: productList,
+                        ),
                     child: const Text(
-                      'Thêm',
+                      'Khác',
                       style: TextStyle(color: Color(0xFF006A71)),
                     ),
                   ),
