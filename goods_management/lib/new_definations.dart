@@ -233,6 +233,24 @@ class ProductList {
       return bInfo.compareTo(aInfo);
     });
   }
+
+  void sortByCategoryAscending() {
+    _products.sort((a, b) {
+      final aCategory = a.category ?? '';
+      final bCategory = b.category ?? '';
+      return aCategory.compareTo(bCategory);
+    });
+  }
+
+  void sortByCategoryDescending() {
+    _products.sort((a, b) {
+      final aCategory = a.category ?? '';
+      final bCategory = b.category ?? '';
+      return bCategory.compareTo(aCategory);
+    });
+  }
+
+
 }
 
 List<Product> allProducts = [

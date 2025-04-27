@@ -15,6 +15,8 @@ class ProductTable extends StatelessWidget {
   final VoidCallback onSortByImportTimeDescending;
   final VoidCallback onSortByInfoAscending;
   final VoidCallback onSortByInfoDescending;
+  final VoidCallback onSortByCategoryAscending;
+  final VoidCallback onSortByCategoryDescending;
 
   const ProductTable({
     super.key,
@@ -29,6 +31,8 @@ class ProductTable extends StatelessWidget {
     required this.onSortByImportTimeDescending,
     required this.onSortByInfoAscending,
     required this.onSortByInfoDescending,
+    required this.onSortByCategoryAscending,
+    required this.onSortByCategoryDescending,
   });
 
   // Method to show product details in a dialog
@@ -101,121 +105,129 @@ class ProductTable extends StatelessWidget {
     final tableWidth = widthTable ?? parentWidth;
     final tableHeight = heightTable ?? parentHeight;
 
-    return Container(
-      alignment: Alignment.topCenter,
-      margin: EdgeInsets.only(
-        left: 0.01 * tableWidth,
-        right: 0.01 * tableHeight,
-      ),
-      child: SizedBox(
-        width: tableWidth,
-        height: tableHeight,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Table Header
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: InkWell(
-                      onTap: () {
-                        // Toggle between ascending and descending
-                        // For simplicity, alternate calls; parent can track state
-                        onSortByNameAscending();
-                      },
-                      onDoubleTap: () {
-                        // Double tap for descending sort
-                        onSortByNameDescending();
-                      },
-                      child: const Text(
-                        'Tên',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.start,
+    return SizedBox(
+      width: tableWidth,
+      height: tableHeight,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Container(
+          constraints: BoxConstraints(minWidth: tableWidth, maxWidth: tableWidth * 2),
+          padding: EdgeInsets.symmetric(horizontal: tableWidth * 0.01),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Table Header
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: InkWell(
+                        onTap: onSortByNameAscending,
+                        onDoubleTap: onSortByNameDescending,
+                        child: const Text(
+                          'Tên',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.start,
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: InkWell(
-                      onTap: () {
-                        onSortByImportTimeAscending();
-                      },
-                      onDoubleTap: () {
-                        onSortByImportTimeDescending();
-                      },
-                      child: const Text(
-                        'Nhập kho',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.start,
+                    Expanded(
+                      flex: 4,
+                      child: InkWell(
+                        onTap: onSortByImportTimeAscending,
+                        onDoubleTap: onSortByImportTimeDescending,
+                        child: const Text(
+                          'Nhập kho',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.start,
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: InkWell(
-                      onTap: () {
-                        onSortByInfoAscending();
-                      },
-                      onDoubleTap: () {
-                        onSortByInfoDescending();
-                      },
-                      child: const Text(
-                        'Thông tin',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.start,
+                    Expanded(
+                      flex: 2,
+                      child: InkWell(
+                        onTap: onSortByCategoryAscending,
+                        onDoubleTap: onSortByCategoryDescending,
+                        child: const Text(
+                          'Danh mục',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.start,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      flex: 5,
+                      child: InkWell(
+                        onTap: onSortByInfoAscending,
+                        onDoubleTap: onSortByInfoDescending,
+                        child: const Text(
+                          'Thông tin',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Divider(height: 1),
-            // Table Rows
-            Expanded(
-              child: ListView.builder(
-                itemCount: products.length,
-                itemBuilder: (context, index) {
-                  final product = products.getElementAtIndex(index);
-                  return GestureDetector(
-                    onTap: () => _showProductDetails(context, product, index),
-                    onLongPressStart: (details) =>
-                        _showContextMenu(context, details.globalPosition, index),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: 4,
-                            child: Text(
-                              product?.name ?? '',
-                              textAlign: TextAlign.start,
+              const Divider(height: 1),
+              // Table Rows
+              Expanded(
+                child: ListView.builder(
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products.getElementAtIndex(index);
+                    return GestureDetector(
+                      onTap: () => _showProductDetails(context, product, index),
+                      onLongPressStart: (details) =>
+                          _showContextMenu(context, details.globalPosition, index),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 4,
+                              child: Text(
+                                product?.name ?? '',
+                                textAlign: TextAlign.start,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            flex: 3,
-                            child: Text(
-                              product?.importTime.toString() ?? '',
-                              textAlign: TextAlign.start,
+                            Expanded(
+                              flex: 4,
+                              child: Text(
+                                product?.importTime.toString() ?? '',
+                                textAlign: TextAlign.start,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            flex: 3,
-                            child: Text(
-                              product?.info ?? '',
-                              textAlign: TextAlign.start,
+                            Expanded(
+                              flex: 2,
+                              child: Text(
+                                product?.category ?? '',
+                                textAlign: TextAlign.start,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
+                            Expanded(
+                              flex: 5,
+                              child: Text(
+                                product?.info ?? '',
+                                textAlign: TextAlign.start,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

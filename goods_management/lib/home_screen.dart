@@ -75,6 +75,18 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _sortByCatagoryAscending() {
+    setState(() {
+      productList.sortByCategoryAscending();
+    });
+  }
+
+  void _sortByCatagoryDescending() {
+    setState(() {
+      productList.sortByCategoryDescending();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -105,6 +117,8 @@ class _HomeScreenState extends State<HomeScreen> {
               onSortByInfoDescending: _sortByInfoDescending,
               onSortByNameAscending: _sortByNameAscending,
               onSortByNameDescending: _sortByNameDescending,
+              onSortByCategoryAscending: _sortByCatagoryAscending,
+              onSortByCategoryDescending: _sortByCatagoryDescending,
             ),
             const SizedBox(height: 16),
             Padding(
@@ -129,6 +143,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                     child: const Text(
                       'Thống kê',
+                      style: TextStyle(color: Color(0xFF006A71)),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed:
+                        (){},
+                    child: const Text(
+                      'Thêm',
                       style: TextStyle(color: Color(0xFF006A71)),
                     ),
                   ),
