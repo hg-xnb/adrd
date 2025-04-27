@@ -241,7 +241,7 @@ class SettingsUtilitiesScreen extends StatelessWidget {
 
   // Manual add new product
   void _addProductManually(BuildContext context) async {
-    final newProduct = Product(productID: 'temp_settings_utilities_screen_dart');
+    final newProduct = Product();
     productList.addProduct(newProduct);
 
     final result = await Navigator.pushNamed(

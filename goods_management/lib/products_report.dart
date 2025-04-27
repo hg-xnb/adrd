@@ -36,7 +36,7 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
         if (_groupBy == 'Day') {
           key = DateFormat('yyyy-MM-dd').format(time);
         } else if (_groupBy == 'Week') {
-          int weekOfYear = int.parse(DateFormat('w').format(time));
+          String weekOfYear = DateFormat('w').format(time).padLeft(2, '0');
           key = '${time.year}-W$weekOfYear';
         } else if (_groupBy == 'Month') {
           key = DateFormat('yyyy-MM').format(time);
