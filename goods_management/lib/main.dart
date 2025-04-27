@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
         '/productsReport': (context) {
           final ProductList productList =
               ModalRoute.of(context)!.settings.arguments as ProductList;
-          return ProductsReportScreen(products: productList.allProducts,);
+          return ProductsReportScreen(products: productList,);
         },
         '/scanQRCode': (_) => const ScanScreen(),
         '/productProperties': (context) {

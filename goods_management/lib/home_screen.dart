@@ -10,27 +10,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  //   void _editProduct(int index) async {
-  //     final result = await Navigator.pushNamed(
-  //       context,
-  //       '/productProperties',
-  //       arguments: index,
-  //     );
-  //     if (result is Product && result != null) {
-  //       setState(() {
-  //         productList.removeByIndex(index);
-  //         productList.addProduct(result);
-  //       });
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         const SnackBar(content: Text('Sản phẩm đã được cập nhật')),
-  //       );
-  //     } else {
-  //       ScaffoldMessenger.of(
-  //         context,
-  //       ).showSnackBar(const SnackBar(content: Text('Đã hủy chỉnh sửa')));
-  //     }
-  //   }
-
   void _editProduct(int index) async {
     // Navigate to ProductProperties and wait for the result
     final result = await Navigator.pushNamed(
@@ -151,7 +130,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   ElevatedButton(
                     onPressed:
-                        () => Navigator.pushNamed(context, '/productsReport'),
+                        () => Navigator.pushNamed(
+                          context,
+                          '/productsReport',
+                          arguments: productList,
+                        ),
                     child: const Text(
                       'Thống kê',
                       style: TextStyle(color: Color(0xFF006A71)),
