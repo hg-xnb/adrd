@@ -23,79 +23,113 @@ class _ScanScreenState extends State<ScanScreen> {
     if (existingProduct != null) {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Sản phẩm đã tồn tại'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Mã sản phẩm: ${existingProduct.productID}'),
-              Text('Tên: ${existingProduct.name ?? "Không có"}'),
-              Text('Xuất xứ: ${existingProduct.origin ?? "Không có"}'),
-              Text('Thông tin: ${existingProduct.info ?? "Không có"}'),
-              Text('Giá: ${existingProduct.price?.toString() ?? "Không có"}'),
-              Text('Danh mục: ${existingProduct.category ?? "Không có"}'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _isDialogShown = false;
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProductProperties(
-                      index: productList.allProducts.indexOf(existingProduct),
-                    ),
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Sản phẩm đã tồn tại'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Mã sản phẩm: ${existingProduct.productID}'),
+                  Text('Tên: ${existingProduct.name ?? "Không có"}'),
+                  Text('Xuất xứ: ${existingProduct.origin ?? "Không có"}'),
+                  Text('Thông tin: ${existingProduct.info ?? "Không có"}'),
+                  Text(
+                    'Giá: ${existingProduct.price?.toString() ?? "Không có"}',
                   ),
-                );
-              },
-              child: const Text('Mở'),
+                  Text('Danh mục: ${existingProduct.category ?? "Không có"}'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _isDialogShown = false;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => ProductProperties(
+                              index: productList.allProducts.indexOf(
+                                existingProduct,
+                              ),
+                            ),
+                      ),
+                    );
+                  },
+                  child: const Text('Mở'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _isDialogShown = false;
+                  },
+                  child: const Text('Đóng'),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _isDialogShown = false;
-              },
-              child: const Text('Đóng'),
-            ),
-          ],
-        ),
       );
     } else {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Sản phẩm không tồn tại'),
-          content: Text('Bạn có muốn thêm sản phẩm mới với mã "$scannedCode"?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                final newProduct = Product(productID: scannedCode);
-                productList.addProduct(newProduct);
-                _isDialogShown = false;
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ProductProperties(
-                      index: productList.allProducts.indexOf(newProduct),
-                    ),
-                  ),
-                );
-              },
-              child: const Text('Thêm mới'),
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Sản phẩm không tồn tại'),
+              content: Text(
+                'Bạn có muốn thêm sản phẩm mới với mã "$scannedCode"?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+
+                    final newProduct = Product(productID: scannedCode);
+                    productList.addProduct(newProduct);
+                    _isDialogShown = false;
+
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder:
+                            (context) => ProductProperties(
+                              index: productList.allProducts.indexOf(
+                                newProduct,
+                              ),
+                            ),
+                      ),
+                    );
+
+                    // Check if result is a Product
+                    if (result is Product) {
+                      setState(() {
+                        // Remove old and add updated product
+                        productList.removeByIndex(
+                          productList.allProducts.indexOf(newProduct),
+                        );
+                        productList.addProduct(result);
+                      });
+
+                      // Show confirmation
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Sản phẩm đã được cập nhật'),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Thêm mới'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _isDialogShown = false;
+                  },
+                  child: const Text('Đóng'),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _isDialogShown = false;
-              },
-              child: const Text('Đóng'),
-            ),
-          ],
-        ),
       );
     }
   }
@@ -130,10 +164,7 @@ class _ScanScreenState extends State<ScanScreen> {
               width: 250,
               height: 250,
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.white,
-                  width: 3,
-                ),
+                border: Border.all(color: Colors.white, width: 3),
                 borderRadius: BorderRadius.circular(16),
               ),
             ),

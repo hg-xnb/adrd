@@ -33,14 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // void _editProduct(int index) {
-  //   Navigator.pushNamed(
-  //     context,
-  //     '/productProperties',
-  //     arguments: index, // Pass your Product object here
-  //   );
-  // }
-
   void _removeProduct(int index) {
     setState(() {
       productList.removeByIndex(index);

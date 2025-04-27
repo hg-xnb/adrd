@@ -21,11 +21,11 @@ class Product {
     this.importTime, // Initialize ImportTime
     this.exportTime, // Initialize ExportTime
   }) {
-    name = name;
+    productID = productID ?? _generateProductID();
+    name = name ?? 'new-$productID';
     origin = origin;
     info = info;
     price = price;
-    productID = productID ?? _generateProductID();
     category = category;
     importTime = importTime;
     exportTime = exportTime;
