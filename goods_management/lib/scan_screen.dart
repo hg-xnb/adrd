@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'product_properties.dart';
 import 'new_definations.dart';
 
 class ScanScreen extends StatefulWidget {
@@ -13,6 +12,45 @@ class ScanScreen extends StatefulWidget {
 class _ScanScreenState extends State<ScanScreen> {
   final MobileScannerController _controller = MobileScannerController();
   bool _isDialogShown = false;
+  Product? _currentProduct; // Track the current scanned product
+
+  Future<void> _handleNewProduct(String scannedCode) async {
+    Navigator.pop(context); // Close the dialog immediately
+
+    // Wait a tiny bit to ensure Navigator.pop is finished
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    if (!mounted) return;
+
+    final newProduct = Product(productID: scannedCode);
+    productList.addProduct(newProduct);
+    _isDialogShown = false;
+
+    // PushNamed and pass arguments
+    final result = await Navigator.pushNamed(
+      context,
+      '/productProperties',
+      arguments: productList.allProducts.indexOf(newProduct),
+    );
+
+    if (!mounted) return;
+
+    if (result is Product) {
+      setState(() {
+        productList.removeByIndex(productList.allProducts.indexOf(newProduct));
+        productList.addProduct(result);
+        _currentProduct = result; // Update lower panel
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sản phẩm đã được cập nhật')),
+      );
+    } else {
+      setState(() {
+        _currentProduct = newProduct;
+      });
+    }
+  }
 
   void _handleScan(BuildContext context, String scannedCode) {
     if (_isDialogShown) return;
@@ -21,103 +59,21 @@ class _ScanScreenState extends State<ScanScreen> {
     final existingProduct = productList.findProductByID(scannedCode);
 
     if (existingProduct != null) {
-      showDialog(
-        context: context,
-        builder:
-            (context) => AlertDialog(
-              title: const Text('Sản phẩm đã tồn tại'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Mã sản phẩm: ${existingProduct.productID}'),
-                  Text('Tên: ${existingProduct.name ?? "Không có"}'),
-                  Text('Xuất xứ: ${existingProduct.origin ?? "Không có"}'),
-                  Text('Thông tin: ${existingProduct.info ?? "Không có"}'),
-                  Text(
-                    'Giá: ${existingProduct.price?.toString() ?? "Không có"}',
-                  ),
-                  Text('Danh mục: ${existingProduct.category ?? "Không có"}'),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _isDialogShown = false;
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => ProductProperties(
-                              index: productList.allProducts.indexOf(
-                                existingProduct,
-                              ),
-                            ),
-                      ),
-                    );
-                  },
-                  child: const Text('Mở'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _isDialogShown = false;
-                  },
-                  child: const Text('Đóng'),
-                ),
-              ],
-            ),
-      );
+      setState(() {
+        _currentProduct = existingProduct;
+      });
+      _isDialogShown = false; // No need to show popup if already found
     } else {
       showDialog(
         context: context,
         builder:
             (context) => AlertDialog(
               title: const Text('Sản phẩm không tồn tại'),
-              content: Text(
-                'Bạn có muốn thêm sản phẩm mới với mã "$scannedCode"?',
-              ),
+              content: Text('Tạo sản phẩm mới với mã "$scannedCode"?'),
               actions: [
                 TextButton(
-                  onPressed: () async {
-                    Navigator.pop(context);
-
-                    final newProduct = Product(productID: scannedCode);
-                    productList.addProduct(newProduct);
-                    _isDialogShown = false;
-
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (context) => ProductProperties(
-                              index: productList.allProducts.indexOf(
-                                newProduct,
-                              ),
-                            ),
-                      ),
-                    );
-
-                    // Check if result is a Product
-                    if (result is Product) {
-                      setState(() {
-                        // Remove old and add updated product
-                        productList.removeByIndex(
-                          productList.allProducts.indexOf(newProduct),
-                        );
-                        productList.addProduct(result);
-                      });
-
-                      // Show confirmation
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Sản phẩm đã được cập nhật'),
-                          ),
-                        );
-                      }
-                    }
+                  onPressed: (){
+                    _handleNewProduct(scannedCode);
                   },
                   child: const Text('Thêm mới'),
                 ),
@@ -144,40 +100,47 @@ class _ScanScreenState extends State<ScanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Quét QRCODE')),
-      body: Stack(
+      body: Column(
         children: [
-          // Camera hiển thị dưới
-          MobileScanner(
-            controller: _controller,
-            onDetect: (BarcodeCapture capture) {
-              if (capture.barcodes.isEmpty) return;
-              final barcode = capture.barcodes.first;
-              final String? code = barcode.rawValue;
-              if (code != null) {
-                _handleScan(context, code);
-              }
-            },
-          ),
-          // Khung scan ở giữa
-          Center(
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.white, width: 3),
-                borderRadius: BorderRadius.circular(16),
-              ),
+          Expanded(
+            flex: 1,
+            child: Stack(
+              children: [
+                MobileScanner(
+                  controller: _controller,
+                  onDetect: (BarcodeCapture capture) {
+                    if (capture.barcodes.isEmpty) return;
+                    final barcode = capture.barcodes.first;
+                    final String? code = barcode.rawValue;
+                    if (code != null) {
+                      _handleScan(context, code);
+                    }
+                  },
+                ),
+                Center(
+                  child: Container(
+                    width: 250,
+                    height: 250,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 3),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+                _buildOverlay(),
+              ],
             ),
           ),
-          // Làm mờ xung quanh
-          _buildOverlay(),
+          Expanded(flex: 1, child: _buildProductInfoPanel()),
         ],
       ),
     );
   }
 
-  // Tạo lớp overlay mờ ngoài vùng scan
+  // Overlay scan zone
   Widget _buildOverlay() {
+    // final double screenHeight = MediaQuery.of(context).size.height;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final double width = constraints.maxWidth;
@@ -188,7 +151,6 @@ class _ScanScreenState extends State<ScanScreen> {
 
         return Stack(
           children: [
-            // Top
             Positioned(
               left: 0,
               right: 0,
@@ -196,7 +158,6 @@ class _ScanScreenState extends State<ScanScreen> {
               height: top,
               child: Container(color: Colors.black.withOpacity(0.5)),
             ),
-            // Bottom
             Positioned(
               left: 0,
               right: 0,
@@ -204,7 +165,6 @@ class _ScanScreenState extends State<ScanScreen> {
               bottom: 0,
               child: Container(color: Colors.black.withOpacity(0.5)),
             ),
-            // Left
             Positioned(
               left: 0,
               top: top,
@@ -212,7 +172,6 @@ class _ScanScreenState extends State<ScanScreen> {
               height: scanBoxSize,
               child: Container(color: Colors.black.withOpacity(0.5)),
             ),
-            // Right
             Positioned(
               right: 0,
               top: top,
@@ -223,6 +182,49 @@ class _ScanScreenState extends State<ScanScreen> {
           ],
         );
       },
+    );
+  }
+
+  // Panel showing current product info
+  Widget _buildProductInfoPanel() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      color: Colors.grey.shade200,
+      width: double.infinity,
+      child:
+          _currentProduct == null
+              ? const Center(child: Text('Chưa có sản phẩm nào'))
+              : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildField('Mã sản phẩm', _currentProduct?.productID),
+                    _buildField('Tên', _currentProduct?.name),
+                    _buildField('Xuất xứ', _currentProduct?.origin),
+                    _buildField('Thông tin', _currentProduct?.info),
+                    _buildField('Giá', _currentProduct?.price?.toString()),
+                    _buildField('Danh mục', _currentProduct?.category),
+                    _buildField(
+                      'Thời gian nhập',
+                      _currentProduct?.importTime?.toString(),
+                    ),
+                    _buildField(
+                      'Thời gian xuất',
+                      _currentProduct?.exportTime?.toString(),
+                    ),
+                  ],
+                ),
+              ),
+    );
+  }
+
+  Widget _buildField(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Text(
+        '$label: ${value ?? "Không có"}',
+        style: const TextStyle(fontSize: 16),
+      ),
     );
   }
 }

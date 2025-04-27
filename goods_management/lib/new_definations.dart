@@ -27,7 +27,7 @@ class Product {
     info = info;
     price = price;
     category = category;
-    importTime = importTime;
+    importTime = importTime??DateTime.now();
     exportTime = exportTime;
   }
 
