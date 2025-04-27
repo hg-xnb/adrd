@@ -10,14 +10,57 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  //   void _editProduct(int index) async {
+  //     final result = await Navigator.pushNamed(
+  //       context,
+  //       '/productProperties',
+  //       arguments: index,
+  //     );
+  //     if (result is Product && result != null) {
+  //       setState(() {
+  //         productList.removeByIndex(index);
+  //         productList.addProduct(result);
+  //       });
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('Sản phẩm đã được cập nhật')),
+  //       );
+  //     } else {
+  //       ScaffoldMessenger.of(
+  //         context,
+  //       ).showSnackBar(const SnackBar(content: Text('Đã hủy chỉnh sửa')));
+  //     }
+  //   }
 
-  void _editProduct(int index) {
-    Navigator.pushNamed(
+  void _editProduct(int index) async {
+    // Navigate to ProductProperties and wait for the result
+    final result = await Navigator.pushNamed(
       context,
       '/productProperties',
-      arguments: index, // Pass your Product object here
+      arguments: index, // Pass the index
     );
+
+    // Handle the returned updatedProduct
+    if (result is Product) {
+      setState(() {
+        productList.removeByIndex(index);
+        productList.addProduct(result);
+      });
+      // Show confirmation
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sản phẩm đã được cập nhật')),
+        );
+      }
+    }
   }
+
+  // void _editProduct(int index) {
+  //   Navigator.pushNamed(
+  //     context,
+  //     '/productProperties',
+  //     arguments: index, // Pass your Product object here
+  //   );
+  // }
 
   void _removeProduct(int index) {
     setState(() {
@@ -108,9 +151,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   ElevatedButton(
                     onPressed:
-                        () => Navigator.pushNamed(context, '/addProduct'),
+                        () => Navigator.pushNamed(context, '/productsReport'),
                     child: const Text(
-                      'Thêm Sản Phẩm',
+                      'Thống kê',
                       style: TextStyle(color: Color(0xFF006A71)),
                     ),
                   ),
