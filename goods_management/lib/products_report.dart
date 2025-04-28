@@ -14,7 +14,7 @@ class ProductsReportScreen extends StatefulWidget {
 }
 
 class _ProductsReportScreenState extends State<ProductsReportScreen> {
-  String _groupBy = 'Month'; // Default grouping
+  String _groupBy = 'Month';
   DateTime? _startDate;
   DateTime? _endDate;
 
@@ -46,7 +46,7 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
           key = DateFormat('yyyy-MM').format(time);
         }
 
-        grouped[key] ??= {'import': 0, 'export': 0};
+        grouped[key] ??= {'import': 0, 'export': 0, 'left': 0};
         grouped[key]![type] = (grouped[key]![type] ?? 0) + 1;
       }
 
@@ -55,12 +55,9 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
     }
 
     // Calculate "left goods" = import - export
-    grouped.forEach((key, value) {
-      int importCount = value['import'] ?? 0;
-      int exportCount = value['export'] ?? 0;
-      int leftGoods = importCount - exportCount;
-      value['left'] = leftGoods > 0 ? leftGoods : 0;
-    });
+    for (var key in grouped.keys) {
+      grouped[key]!['left'] = grouped[key]!['import']! - grouped[key]!['export']!;
+    }
 
     var sortedKeys = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
     var sortedGrouped = {for (var key in sortedKeys) key: grouped[key]!};
@@ -69,8 +66,7 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
   }
 
   Future<void> _selectDate(BuildContext context, bool isStart) async {
-    final DateTime initialDate =
-        isStart ? (_startDate ?? DateTime.now()) : (_endDate ?? DateTime.now());
+    final DateTime initialDate = isStart ? (_startDate ?? DateTime.now()) : (_endDate ?? DateTime.now());
     final DateTime firstDate = DateTime(2000);
     final DateTime lastDate = DateTime(2100);
 
@@ -116,7 +112,6 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Dropdown Group By
             Row(
               children: [
                 const Text('Group by: '),
@@ -187,7 +182,6 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
 
             const SizedBox(height: 16),
 
-            // Chart
             Expanded(
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -198,7 +192,7 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                   child: BarChart(
                     BarChartData(
                       alignment: BarChartAlignment.spaceAround,
-                      groupsSpace: 40,
+                      groupsSpace: 30,
                       barTouchData: BarTouchData(enabled: false),
                       barGroups: data.entries.mapIndexed((index, entry) {
                         return BarChartGroupData(
@@ -232,8 +226,7 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                             showTitles: true,
                             reservedSize: 60,
                             getTitlesWidget: (double value, TitleMeta meta) {
-                              if (value.toInt() >= data.keys.length)
-                                return Container();
+                              if (value.toInt() >= data.keys.length) return Container();
                               return Transform.rotate(
                                 angle: -0.5,
                                 child: Text(
@@ -290,7 +283,6 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
               ),
             ),
 
-            // Legend
             const Row(
               children: [
                 LegendItem(color: Colors.blue, text: 'Import'),
