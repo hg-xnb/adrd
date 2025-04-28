@@ -54,19 +54,27 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
       addTime(product.exportTime, 'export');
     }
 
-    // Calculate "left goods" = import - export
-    for (var key in grouped.keys) {
-      grouped[key]!['left'] = grouped[key]!['import']! - grouped[key]!['export']!;
+    // Sort keys ascending to correctly accumulate
+    var sortedKeys = grouped.keys.toList()..sort((a, b) => a.compareTo(b));
+
+    int cumulativeLeft = 0;
+    for (var key in sortedKeys) {
+      var entry = grouped[key]!;
+      cumulativeLeft += (entry['import'] ?? 0) - (entry['export'] ?? 0);
+      entry['left'] = cumulativeLeft;
     }
 
-    var sortedKeys = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
-    var sortedGrouped = {for (var key in sortedKeys) key: grouped[key]!};
+    // Now sort descending (latest first)
+    var sortedGrouped = {
+      for (var key in sortedKeys.reversed) key: grouped[key]!,
+    };
 
     return sortedGrouped;
   }
 
   Future<void> _selectDate(BuildContext context, bool isStart) async {
-    final DateTime initialDate = isStart ? (_startDate ?? DateTime.now()) : (_endDate ?? DateTime.now());
+    final DateTime initialDate =
+        isStart ? (_startDate ?? DateTime.now()) : (_endDate ?? DateTime.now());
     final DateTime firstDate = DateTime(2000);
     final DateTime lastDate = DateTime(2100);
 
@@ -126,9 +134,12 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                 const SizedBox(width: 8),
                 DropdownButton<String>(
                   value: _groupBy,
-                  items: ['Day', 'Week', 'Month', 'Year']
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
+                  items:
+                      ['Day', 'Week', 'Month', 'Year']
+                          .map(
+                            (e) => DropdownMenuItem(value: e, child: Text(e)),
+                          )
+                          .toList(),
                   onChanged: (val) {
                     if (val != null) {
                       setState(() {
@@ -167,9 +178,12 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                             suffixIcon: Icon(Icons.calendar_today),
                           ),
                           controller: TextEditingController(
-                            text: _startDate != null
-                                ? DateFormat('yyyy-MM-dd').format(_startDate!)
-                                : '',
+                            text:
+                                _startDate != null
+                                    ? DateFormat(
+                                      'yyyy-MM-dd',
+                                    ).format(_startDate!)
+                                    : '',
                           ),
                         ),
                       ),
@@ -187,9 +201,10 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                             suffixIcon: Icon(Icons.calendar_today),
                           ),
                           controller: TextEditingController(
-                            text: _endDate != null
-                                ? DateFormat('yyyy-MM-dd').format(_endDate!)
-                                : '',
+                            text:
+                                _endDate != null
+                                    ? DateFormat('yyyy-MM-dd').format(_endDate!)
+                                    : '',
                           ),
                         ),
                       ),
@@ -212,39 +227,41 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                       alignment: BarChartAlignment.spaceAround,
                       groupsSpace: 30,
                       barTouchData: BarTouchData(enabled: false),
-                      barGroups: data.entries.mapIndexed((index, entry) {
-                        return BarChartGroupData(
-                          x: index,
-                          barsSpace: 8,
-                          barRods: [
-                            BarChartRodData(
-                              toY: entry.value['import']!.toDouble(),
-                              color: Colors.blue,
-                              width: 6,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            BarChartRodData(
-                              toY: entry.value['export']!.toDouble(),
-                              color: Colors.green,
-                              width: 6,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            BarChartRodData(
-                              toY: entry.value['left']!.toDouble(),
-                              color: Colors.orange,
-                              width: 6,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ],
-                        );
-                      }).toList(),
+                      barGroups:
+                          data.entries.mapIndexed((index, entry) {
+                            return BarChartGroupData(
+                              x: index,
+                              barsSpace: 8,
+                              barRods: [
+                                BarChartRodData(
+                                  toY: entry.value['import']!.toDouble(),
+                                  color: Colors.blue,
+                                  width: 6,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                BarChartRodData(
+                                  toY: entry.value['export']!.toDouble(),
+                                  color: Colors.green,
+                                  width: 6,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                BarChartRodData(
+                                  toY: entry.value['left']!.toDouble(),
+                                  color: Colors.orange,
+                                  width: 6,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ],
+                            );
+                          }).toList(),
                       titlesData: FlTitlesData(
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(
                             showTitles: true,
                             reservedSize: 60,
                             getTitlesWidget: (double value, TitleMeta meta) {
-                              if (value.toInt() >= data.keys.length) return Container();
+                              if (value.toInt() >= data.keys.length)
+                                return Container();
                               return Transform.rotate(
                                 angle: -0.5,
                                 child: Text(
@@ -283,10 +300,11 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                         show: true,
                         drawVerticalLine: false,
                         drawHorizontalLine: true,
-                        getDrawingHorizontalLine: (value) => FlLine(
-                          color: Colors.grey.withAlpha((0.5 * 255).toInt()),
-                          strokeWidth: 1,
-                        ),
+                        getDrawingHorizontalLine:
+                            (value) => FlLine(
+                              color: Colors.grey.withAlpha((0.5 * 255).toInt()),
+                              strokeWidth: 1,
+                            ),
                       ),
                       borderData: FlBorderData(
                         show: true,
