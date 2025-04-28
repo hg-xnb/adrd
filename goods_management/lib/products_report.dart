@@ -54,6 +54,14 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
       addTime(product.exportTime, 'export');
     }
 
+    // Calculate "left goods" = import - export
+    grouped.forEach((key, value) {
+      int importCount = value['import'] ?? 0;
+      int exportCount = value['export'] ?? 0;
+      int leftGoods = importCount - exportCount;
+      value['left'] = leftGoods > 0 ? leftGoods : 0;
+    });
+
     var sortedKeys = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
     var sortedGrouped = {for (var key in sortedKeys) key: grouped[key]!};
 
@@ -115,12 +123,9 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                 const SizedBox(width: 8),
                 DropdownButton<String>(
                   value: _groupBy,
-                  items:
-                      ['Day', 'Week', 'Month', 'Year']
-                          .map(
-                            (e) => DropdownMenuItem(value: e, child: Text(e)),
-                          )
-                          .toList(),
+                  items: ['Day', 'Week', 'Month', 'Year']
+                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .toList(),
                   onChanged: (val) {
                     if (val != null) {
                       setState(() {
@@ -135,7 +140,6 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Show date pickers if group by "Day"
             if (_groupBy == 'Day')
               Row(
                 children: [
@@ -150,12 +154,9 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                             suffixIcon: Icon(Icons.calendar_today),
                           ),
                           controller: TextEditingController(
-                            text:
-                                _startDate != null
-                                    ? DateFormat(
-                                      'yyyy-MM-dd',
-                                    ).format(_startDate!)
-                                    : '',
+                            text: _startDate != null
+                                ? DateFormat('yyyy-MM-dd').format(_startDate!)
+                                : '',
                           ),
                         ),
                       ),
@@ -173,10 +174,9 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                             suffixIcon: Icon(Icons.calendar_today),
                           ),
                           controller: TextEditingController(
-                            text:
-                                _endDate != null
-                                    ? DateFormat('yyyy-MM-dd').format(_endDate!)
-                                    : '',
+                            text: _endDate != null
+                                ? DateFormat('yyyy-MM-dd').format(_endDate!)
+                                : '',
                           ),
                         ),
                       ),
@@ -194,33 +194,38 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                 child: Container(
                   margin: const EdgeInsets.all(16),
                   height: 300,
-                  width: data.length * 80,
+                  width: data.length * 100,
                   child: BarChart(
                     BarChartData(
                       alignment: BarChartAlignment.spaceAround,
                       groupsSpace: 40,
                       barTouchData: BarTouchData(enabled: false),
-                      barGroups:
-                          data.entries.mapIndexed((index, entry) {
-                            return BarChartGroupData(
-                              x: index,
-                              barsSpace: 10,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: entry.value['import']!.toDouble(),
-                                  color: Colors.blue,
-                                  width: 6,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                BarChartRodData(
-                                  toY: entry.value['export']!.toDouble(),
-                                  color: Colors.green,
-                                  width: 6,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ],
-                            );
-                          }).toList(),
+                      barGroups: data.entries.mapIndexed((index, entry) {
+                        return BarChartGroupData(
+                          x: index,
+                          barsSpace: 8,
+                          barRods: [
+                            BarChartRodData(
+                              toY: entry.value['import']!.toDouble(),
+                              color: Colors.blue,
+                              width: 6,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            BarChartRodData(
+                              toY: entry.value['export']!.toDouble(),
+                              color: Colors.green,
+                              width: 6,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            BarChartRodData(
+                              toY: entry.value['left']!.toDouble(),
+                              color: Colors.orange,
+                              width: 6,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ],
+                        );
+                      }).toList(),
                       titlesData: FlTitlesData(
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(
@@ -243,7 +248,7 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                           sideTitles: SideTitles(
                             showTitles: true,
                             reservedSize: 40,
-                            interval: 1, // <-- Force integer interval
+                            interval: 1,
                             getTitlesWidget: (value, meta) {
                               if (value % 1 == 0) {
                                 return Text(
@@ -267,11 +272,10 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                         show: true,
                         drawVerticalLine: false,
                         drawHorizontalLine: true,
-                        getDrawingHorizontalLine:
-                            (value) => FlLine(
-                              color: Colors.grey.withAlpha((0.5 * 255).toInt()),
-                              strokeWidth: 1,
-                            ),
+                        getDrawingHorizontalLine: (value) => FlLine(
+                          color: Colors.grey.withAlpha((0.5 * 255).toInt()),
+                          strokeWidth: 1,
+                        ),
                       ),
                       borderData: FlBorderData(
                         show: true,
@@ -292,6 +296,8 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                 LegendItem(color: Colors.blue, text: 'Import'),
                 SizedBox(width: 16),
                 LegendItem(color: Colors.green, text: 'Export'),
+                SizedBox(width: 16),
+                LegendItem(color: Colors.orange, text: 'Left Goods'),
               ],
             ),
           ],
