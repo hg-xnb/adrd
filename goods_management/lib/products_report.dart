@@ -88,6 +88,14 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
     }
   }
 
+  void _reloadData() {
+    setState(() {
+      _startDate = null;
+      _endDate = null;
+      _groupBy = 'Month'; // Reset to default group by
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = _groupedData();
@@ -130,6 +138,16 @@ class _ProductsReportScreenState extends State<ProductsReportScreen> {
                       });
                     }
                   },
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton.icon(
+                  onPressed: _reloadData,
+                  icon: const Icon(Icons.refresh, size: 20),
+                  label: const Text('Reload'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF006A71),
+                    foregroundColor: Colors.white,
+                  ),
                 ),
               ],
             ),
