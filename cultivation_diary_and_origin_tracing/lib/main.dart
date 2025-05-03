@@ -20,9 +20,9 @@ class MyApp extends StatelessWidget {
       home: const HomeScreen(),
       routes: {
         '/productsReport': (context) {
-          final ProductList productList =
-              ModalRoute.of(context)!.settings.arguments as ProductList;
-          return ProductsReportScreen(products: productList);
+          final ProductsList productsList =
+              ModalRoute.of(context)!.settings.arguments as ProductsList;
+          return ProductsReportScreen(products: productsList);
         },
         '/scanQRCode': (_) => const ScanScreen(),
         '/productProperties': (context) {
@@ -30,9 +30,9 @@ class MyApp extends StatelessWidget {
           return ProductProperties(index: index);
         },
         '/settingsUtilities': (context) {
-          final ProductList productList =
-              ModalRoute.of(context)!.settings.arguments as ProductList;
-          return SettingsUtilitiesScreen(productList: productList);
+          final ProductsList productsList =
+              ModalRoute.of(context)!.settings.arguments as ProductsList;
+          return SettingsUtilitiesScreen(productsList: productsList);
         },
         '/allProducts': (context) => const AllProducts(),
       },

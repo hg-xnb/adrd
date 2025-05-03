@@ -7,7 +7,7 @@ enum MenuAction { edit, remove }
 class ProductTable extends StatelessWidget {
   final double? widthTable;
   final double? heightTable;
-  final ProductList products;
+  final ProductsList products;
   final Function(int) onEditClicked;
   final Function(int) onRemoveClicked;
   final VoidCallback onSortByNameAscending;
@@ -36,6 +36,27 @@ class ProductTable extends StatelessWidget {
     required this.onSortByCategoryDescending,
   });
 
+  Widget wrapTextRow(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6.0),
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(color: Colors.black, fontSize: 14),
+          children: [
+            TextSpan(
+              text: '$label: ',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(text: value ?? 'N/A'),
+          ],
+        ),
+        maxLines: null,
+        textAlign: TextAlign.left,
+        overflow: TextOverflow.visible,
+      ),
+    );
+  }
+
   void _showProductDetails(BuildContext context, Product? product, int index) {
     if (product == null) return;
 
@@ -49,69 +70,15 @@ class ProductTable extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        'ID: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(product.productID ?? 'N/A'),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'Origin: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(product.origin ?? 'N/A'),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'Info: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(product.info ?? 'N/A'),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'Price: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(product.price?.toString() ?? 'N/A'),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'Category: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(product.category ?? 'N/A'),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'Import Time: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(product.importTime?.toString() ?? 'N/A'),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        'Export Time: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(product.exportTime?.toString() ?? 'N/A'),
-                    ],
-                  ),
+                  wrapTextRow('ID: ', product.productID),
+                  wrapTextRow('X. xứ: ', product.origin),
+                  wrapTextRow('S. lượng: ', product.quantity?.toString()),
+                  wrapTextRow('Đ. vị: ', product.quantityUnit),
+                  wrapTextRow('T. tin: ', product.info),
+                  wrapTextRow('G. tiền: ', product.price?.toString()),
+                  wrapTextRow('P. loại: ', product.category),
+                  wrapTextRow('T.G. Nhập: ', product.importTime?.toString()),
+                  wrapTextRow('T.G. Xuất: ', product.exportTime?.toString()),
                 ],
               ),
             ),

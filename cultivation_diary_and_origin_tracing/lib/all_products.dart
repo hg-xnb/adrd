@@ -21,8 +21,8 @@ class _AllProductsState extends State<AllProducts> {
     // Handle the returned updatedProduct
     if (result is Product) {
       setState(() {
-        productList.removeByIndex(index);
-        productList.addProduct(result);
+        productsList.removeByIndex(index);
+        productsList.addProduct(result);
       });
       // Show confirmation
       if (mounted) {
@@ -35,55 +35,55 @@ class _AllProductsState extends State<AllProducts> {
 
   void _removeProduct(int index) {
     setState(() {
-      productList.removeByIndex(index);
+      productsList.removeByIndex(index);
     });
   }
 
   void _sortByImportTimeAscending() {
     setState(() {
-      productList.sortByImportTimeAscending();
+      productsList.sortByImportTimeAscending();
     });
   }
 
   void _sortByImportTimeDescending() {
     setState(() {
-      productList.sortByImportTimeDescending();
+      productsList.sortByImportTimeDescending();
     });
   }
 
   void _sortByInfoAscending() {
     setState(() {
-      productList.sortByInfoAscending();
+      productsList.sortByInfoAscending();
     });
   }
 
   void _sortByInfoDescending() {
     setState(() {
-      productList.sortByInfoDescending();
+      productsList.sortByInfoDescending();
     });
   }
 
   void _sortByNameAscending() {
     setState(() {
-      productList.sortByNameAscending();
+      productsList.sortByNameAscending();
     });
   }
 
   void _sortByNameDescending() {
     setState(() {
-      productList.sortByNameDescending();
+      productsList.sortByNameDescending();
     });
   }
 
   void _sortByCatagoryAscending() {
     setState(() {
-      productList.sortByCategoryAscending();
+      productsList.sortByCategoryAscending();
     });
   }
 
   void _sortByCatagoryDescending() {
     setState(() {
-      productList.sortByCategoryDescending();
+      productsList.sortByCategoryDescending();
     });
   }
 
@@ -107,7 +107,7 @@ class _AllProductsState extends State<AllProducts> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             ProductTable(
-              products: productList,
+              products: productsList,
               heightTable: screenHeight - 225,
               onEditClicked: _editProduct,
               onRemoveClicked: _removeProduct,
@@ -139,7 +139,7 @@ class _AllProductsState extends State<AllProducts> {
                         () => Navigator.pushNamed(
                           context,
                           '/productsReport',
-                          arguments: productList,
+                          arguments: productsList,
                         ),
                     child: const Text(
                       'Thống kê',
@@ -151,7 +151,7 @@ class _AllProductsState extends State<AllProducts> {
                         () => Navigator.pushNamed(
                           context,
                           '/settingsUtilities',
-                          arguments: productList,
+                          arguments: productsList,
                         ),
                     child: const Text(
                       'Khác',

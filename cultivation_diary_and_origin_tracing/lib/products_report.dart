@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'new_definations.dart';
 
 class ProductsReportScreen extends StatefulWidget {
-  final ProductList products;
+  final ProductsList products;
 
   const ProductsReportScreen({super.key, required this.products});
 

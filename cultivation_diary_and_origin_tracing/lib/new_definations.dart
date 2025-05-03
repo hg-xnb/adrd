@@ -1,4 +1,9 @@
 import 'package:collection/collection.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/material.dart';
+
+/// ------------------------------------------------------------------- ///
 
 class Product {
   String? name;
@@ -9,7 +14,8 @@ class Product {
   String? category;
   DateTime? importTime;
   DateTime? exportTime;
-  int? amount; // Thêm trường amount
+  double? quantity;
+  String? quantityUnit;
 
   // Default constructor
   Product({
@@ -21,7 +27,7 @@ class Product {
     this.category,
     this.importTime,
     this.exportTime,
-    this.amount, // Gán amount
+    this.quantity, // Gán quantity
   }) {
     productID = productID ?? _generateProductID();
     name = name ?? 'new-$productID';
@@ -31,7 +37,7 @@ class Product {
     category = category;
     importTime = importTime ?? DateTime.now();
     exportTime = exportTime;
-    amount = amount ?? 0;
+    quantity = quantity ?? 0;
   }
 
   String _generateProductID() {
@@ -57,7 +63,7 @@ class Product {
       'category': category,
       'importTime': importTime?.toIso8601String(),
       'exportTime': exportTime?.toIso8601String(),
-      'amount': amount, // Thêm vào map
+      'quantity': quantity, // Thêm vào map
     };
   }
 
@@ -73,13 +79,13 @@ class Product {
           map['importTime'] != null ? DateTime.parse(map['importTime']) : null,
       exportTime:
           map['exportTime'] != null ? DateTime.parse(map['exportTime']) : null,
-      amount: map['amount'], // Parse amount từ map
+      quantity: map['quantity'], // Parse quantity từ map
     );
   }
 
   @override
   String toString() {
-    return 'Product{name: $name, origin: $origin, info: $info, price: $price, productID: $productID, category: $category, importTime: $importTime, exportTime: $exportTime, amount: $amount}';
+    return 'Product{name: $name, origin: $origin, info: $info, price: $price, productID: $productID, category: $category, importTime: $importTime, exportTime: $exportTime, quantity: $quantity}';
   }
 
   @override
@@ -93,11 +99,11 @@ class Product {
   int get hashCode => productID.hashCode;
 }
 
-class ProductList {
+class ProductsList {
   final List<Product> _products = [];
 
   // Constructor that initializes with a list of products
-  ProductList({List<Product>? initialProducts}) {
+  ProductsList({List<Product>? initialProducts}) {
     if (initialProducts != null) {
       _products.addAll(initialProducts);
     }
@@ -246,11 +252,11 @@ class ProductList {
   }
 
   void sortByAmountAscending() {
-    _products.sort((a, b) => (a.amount ?? 0).compareTo(b.amount ?? 0));
+    _products.sort((a, b) => (a.quantity ?? 0).compareTo(b.quantity ?? 0));
   }
 
   void sortByAmountDescending() {
-    _products.sort((a, b) => (b.amount ?? 0).compareTo(a.amount ?? 0));
+    _products.sort((a, b) => (b.quantity ?? 0).compareTo(a.quantity ?? 0));
   }
 }
 
@@ -265,7 +271,7 @@ List<Product> allProducts = [
     category: "Rau củ",
     importTime: DateTime(2025, 4, 10, 7, 30),
     exportTime: DateTime(2025, 4, 20, 16, 0),
-    amount: 100,
+    quantity: 100,
   ),
   Product(
     name: "Cải bó xôi",
@@ -276,7 +282,7 @@ List<Product> allProducts = [
     category: "Rau lá",
     importTime: DateTime(2025, 4, 12, 8, 15),
     exportTime: DateTime(2025, 4, 22, 17, 0),
-    amount: 80,
+    quantity: 80,
   ),
   Product(
     name: "Khoai tây",
@@ -287,7 +293,7 @@ List<Product> allProducts = [
     category: "Củ",
     importTime: DateTime(2025, 4, 8, 6, 45),
     exportTime: DateTime(2025, 4, 19, 14, 30),
-    amount: 150,
+    quantity: 150,
   ),
   Product(
     name: "Cà rốt",
@@ -298,7 +304,7 @@ List<Product> allProducts = [
     category: "Củ",
     importTime: DateTime(2025, 4, 9, 7, 0),
     exportTime: DateTime(2025, 4, 21, 15, 45),
-    amount: 120,
+    quantity: 120,
   ),
   Product(
     name: "Xà lách",
@@ -309,7 +315,7 @@ List<Product> allProducts = [
     category: "Rau lá",
     importTime: DateTime(2025, 4, 11, 8, 0),
     exportTime: DateTime(2025, 4, 23, 16, 15),
-    amount: 70,
+    quantity: 70,
   ),
   Product(
     name: "Hành lá",
@@ -320,7 +326,7 @@ List<Product> allProducts = [
     category: "Gia vị",
     importTime: DateTime(2025, 4, 10, 6, 30),
     exportTime: DateTime(2025, 4, 20, 13, 20),
-    amount: 60,
+    quantity: 60,
   ),
   Product(
     name: "Ớt chuông đỏ",
@@ -331,7 +337,7 @@ List<Product> allProducts = [
     category: "Rau củ",
     importTime: DateTime(2025, 4, 13, 9, 30),
     exportTime: DateTime(2025, 4, 24, 17, 45),
-    amount: 90,
+    quantity: 90,
   ),
   Product(
     name: "Bí đỏ",
@@ -342,7 +348,7 @@ List<Product> allProducts = [
     category: "Củ quả",
     importTime: DateTime(2025, 4, 7, 7, 15),
     exportTime: DateTime(2025, 4, 18, 12, 50),
-    amount: 110,
+    quantity: 110,
   ),
   Product(
     name: "Đậu que",
@@ -353,7 +359,7 @@ List<Product> allProducts = [
     category: "Đậu",
     importTime: DateTime(2025, 4, 14, 10, 0),
     exportTime: DateTime(2025, 4, 25, 15, 30),
-    amount: 85,
+    quantity: 85,
   ),
   Product(
     name: "Su su",
@@ -364,7 +370,7 @@ List<Product> allProducts = [
     category: "Rau củ",
     importTime: DateTime(2025, 4, 6, 6, 0),
     exportTime: DateTime(2025, 4, 17, 11, 15),
-    amount: 95,
+    quantity: 95,
   ),
 
   // Tạo sản phẩm từ 11 đến 100
@@ -403,12 +409,71 @@ List<Product> allProducts = [
         (i + 1) % 24,
         (i + 10) % 60,
       ),
-      amount: 50 + (i % 100), // số lượng 50–149 kg
+      quantity: 50 + (i % 100), // số lượng 50–149 kg
     ),
 ];
 
-ProductList productList = ProductList(initialProducts: allProducts);
+ProductsList productsList = ProductsList(initialProducts: allProducts);
 
 List<Map<String, double>> runningConfig = [
   {"ac": 12.0},
 ];
+
+
+/// ------------------------------------------------------------------- ///
+class FarmingLogEntry {
+  List<File> images = [];
+  int currentImageIndex = 0;
+  DateTime entryDateTime;
+  String cropVariety;
+  String care;
+  String fertilizing;
+  String spraying;
+  int wateringAmount;
+  String wateringNote;
+  DateTime? harvestTime;
+  String harvestNote;
+  String preservation;
+
+  FarmingLogEntry({
+    DateTime? entryDateTime,
+    this.cropVariety = '',
+    this.care = '',
+    this.fertilizing = '',
+    this.spraying = '',
+    this.wateringAmount = 0,
+    this.wateringNote = '',
+    this.harvestTime,
+    this.harvestNote = '',
+    this.preservation = '',
+  }) : entryDateTime = entryDateTime ?? DateTime.now();
+
+  Future<void> pickImage(BuildContext context) async {
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder:
+          (ctx) => SimpleDialog(
+            title: const Text('Chọn nguồn ảnh'),
+            children: [
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(ctx, ImageSource.camera),
+                child: const Text('Chụp ảnh'),
+              ),
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(ctx, ImageSource.gallery),
+                child: const Text('Thư viện'),
+              ),
+            ],
+          ),
+    );
+
+    if (source != null) {
+      final picked = await ImagePicker().pickImage(source: source);
+      if (picked != null) {
+        images.add(File(picked.path));
+      }
+    }
+  }
+
+  File? get currentImage => images.isEmpty ? null : images[currentImageIndex];
+}

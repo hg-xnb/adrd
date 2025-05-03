@@ -6,9 +6,9 @@ import 'dart:io';
 import 'new_definations.dart';
 
 class SettingsUtilitiesScreen extends StatelessWidget {
-  final ProductList productList;
+  final ProductsList productsList;
 
-  const SettingsUtilitiesScreen({super.key, required this.productList});
+  const SettingsUtilitiesScreen({super.key, required this.productsList});
 
   // Generate file name with format goods_<current datetime>
   String _generateFileName() {
@@ -43,16 +43,16 @@ class SettingsUtilitiesScreen extends StatelessWidget {
 
       // Xóa hết sản phẩm cũ
       final productIds =
-          productList.allProducts.map((p) => p.productID).toList();
+          productsList.allProducts.map((p) => p.productID).toList();
       for (final id in productIds) {
-        if (id != null) productList.deleteProduct(id);
+        if (id != null) productsList.deleteProduct(id);
       }
 
       // Thêm sản phẩm mới
       int addedCount = 0;
       for (final item in jsonData) {
         try {
-          productList.addProduct(Product.fromMap(item as Map<String, dynamic>));
+          productsList.addProduct(Product.fromMap(item as Map<String, dynamic>));
           addedCount++;
         } catch (e) {
           if (e is ArgumentError && e.message.contains('already exists')) {
@@ -122,13 +122,13 @@ class SettingsUtilitiesScreen extends StatelessWidget {
           if (productData is Map<String, dynamic>) {
             final newProduct = Product.fromMap(productData);
 
-            if (productList.findProductByID(newProduct.productID ?? '') !=
+            if (productsList.findProductByID(newProduct.productID ?? '') !=
                 null) {
               skippedCount++;
               continue;
             }
 
-            productList.addProduct(newProduct);
+            productsList.addProduct(newProduct);
             importedCount++;
           }
         }
@@ -182,7 +182,7 @@ class SettingsUtilitiesScreen extends StatelessWidget {
         await file.create();
       }
 
-      final jsonData = productList.allProducts.map((p) => p.toMap()).toList();
+      final jsonData = productsList.allProducts.map((p) => p.toMap()).toList();
       await file.writeAsString(jsonEncode(jsonData));
 
       if (_isContextValid(context)) {
@@ -201,9 +201,9 @@ class SettingsUtilitiesScreen extends StatelessWidget {
 
   // Remove all products
   void _removeAllProducts(BuildContext context) {
-    final productIds = productList.allProducts.map((p) => p.productID).toList();
+    final productIds = productsList.allProducts.map((p) => p.productID).toList();
     for (final id in productIds) {
-      if (id != null) productList.deleteProduct(id);
+      if (id != null) productsList.deleteProduct(id);
     }
     if (_isContextValid(context)) {
       ScaffoldMessenger.of(
@@ -242,17 +242,17 @@ class SettingsUtilitiesScreen extends StatelessWidget {
   // Manual add new product
   void _addProductManually(BuildContext context) async {
     final newProduct = Product();
-    productList.addProduct(newProduct);
+    productsList.addProduct(newProduct);
 
     final result = await Navigator.pushNamed(
       context,
       '/productProperties',
-      arguments: productList.allProducts.indexOf(newProduct), // Không truyền index vì đây là thêm mới
+      arguments: productsList.allProducts.indexOf(newProduct), // Không truyền index vì đây là thêm mới
     );
-    productList.removeByIndex(productList.allProducts.indexOf(newProduct));
+    productsList.removeByIndex(productsList.allProducts.indexOf(newProduct));
     
     if (result is Product) {
-      productList.addProduct(result);
+      productsList.addProduct(result);
       if (_isContextValid(context)) {
         ScaffoldMessenger.of(
           context,
@@ -264,13 +264,13 @@ class SettingsUtilitiesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Tiện ích / Thiết lập',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-        ),
-        backgroundColor: const Color(0xFF006A71),
-      ),
+      // appBar: AppBar(
+      //   title: const Text(
+      //     'Tiện ích / Thiết lập',
+      //     style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+      //   ),
+      //   backgroundColor: const Color(0xFF006A71),
+      // ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [

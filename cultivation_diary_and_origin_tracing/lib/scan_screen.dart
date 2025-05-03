@@ -23,22 +23,22 @@ class _ScanScreenState extends State<ScanScreen> {
     if (!mounted) return;
 
     final newProduct = Product(productID: scannedCode);
-    productList.addProduct(newProduct);
+    productsList.addProduct(newProduct);
     _isDialogShown = false;
 
     // PushNamed and pass arguments
     final result = await Navigator.pushNamed(
       context,
       '/productProperties',
-      arguments: productList.allProducts.indexOf(newProduct),
+      arguments: productsList.allProducts.indexOf(newProduct),
     );
-    productList.removeByIndex(productList.allProducts.indexOf(newProduct));
+    productsList.removeByIndex(productsList.allProducts.indexOf(newProduct));
 
     if (!mounted) return;
 
     if (result is Product) {
       setState(() {
-        productList.addProduct(result);
+        productsList.addProduct(result);
         _currentProduct = result; // Update lower panel
       });
 
@@ -56,7 +56,7 @@ class _ScanScreenState extends State<ScanScreen> {
     if (_isDialogShown) return;
     _isDialogShown = true;
 
-    final existingProduct = productList.findProductByID(scannedCode);
+    final existingProduct = productsList.findProductByID(scannedCode);
 
     if (existingProduct != null) {
       setState(() {

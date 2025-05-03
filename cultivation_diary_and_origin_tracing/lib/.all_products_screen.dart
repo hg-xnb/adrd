@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class HistoryScreen extends StatelessWidget {
-  HistoryScreen({super.key});
+class AllProducts extends StatelessWidget {
+  AllProducts({super.key});
   final viewedProducts = ['Sản phẩm A', 'Sản phẩm B', 'Sản phẩm C', 'Sản phẩm D'];
 
   @override

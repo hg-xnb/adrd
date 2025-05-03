@@ -1,39 +1,8 @@
+import 'diary_tab.dart';
+import 'table_view.dart';
+import 'new_definations.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-
-class FarmingLogEntry {
-  File? image;
-  String cropVariety;
-  String care;
-  String fertilizing;
-  String spraying;
-  int wateringAmount;
-  String wateringNote;
-  DateTime? harvestTime;
-  String harvestNote;
-  String preservation;
-
-  FarmingLogEntry({
-    this.image,
-    this.cropVariety = '',
-    this.care = '',
-    this.fertilizing = '',
-    this.spraying = '',
-    this.wateringAmount = 0,
-    this.wateringNote = '',
-    this.harvestTime,
-    this.harvestNote = '',
-    this.preservation = '',
-  });
-
-  Future<void> pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      image = File(pickedFile.path);
-    }
-  }
-}
+import 'settings_utilities_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -42,9 +11,12 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<FarmingLogEntry> entries = [FarmingLogEntry(), FarmingLogEntry(), FarmingLogEntry()];
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+  List<FarmingLogEntry> entries = [FarmingLogEntry()];
 
   @override
   void initState() {
@@ -52,110 +24,167 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     super.initState();
   }
 
-  Future<void> _editField({
-    required String title,
-    required String initialValue,
-    required ValueChanged<String> onSaved,
-  }) async {
-    final controller = TextEditingController(text: initialValue);
-    await showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: TextField(controller: controller),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
-          ),
-          TextButton(
-            onPressed: () {
-              onSaved(controller.text);
-              Navigator.pop(ctx);
-              setState(() {});
-            },
-            child: const Text('Lưu'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFlashCard(FarmingLogEntry entry) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          GestureDetector(
-            onTap: () async {
-              await entry.pickImage();
-              setState(() {});
-            },
-            child: entry.image != null
-                ? Image.file(entry.image!, height: 200, fit: BoxFit.cover)
-                : Container(
-                    height: 200,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.add_a_photo),
-                  ),
-          ),
-          const SizedBox(height: 12),
-          _editableField('Giống cây', entry.cropVariety, (v) => entry.cropVariety = v),
-          _editableField('Chăm sóc', entry.care, (v) => entry.care = v),
-          _editableField('Bón phân', entry.fertilizing, (v) => entry.fertilizing = v),
-          _editableField('Phun thuốc', entry.spraying, (v) => entry.spraying = v),
-          _editableField('Tưới nước (lít)', entry.wateringAmount.toString(), (v) => entry.wateringAmount = int.tryParse(v) ?? 0),
-          _editableField('Ghi chú tưới nước', entry.wateringNote, (v) => entry.wateringNote = v),
-          _editableField('Ghi chú thu hoạch', entry.harvestNote, (v) => entry.harvestNote = v),
-          _editableField('Bảo quản', entry.preservation, (v) => entry.preservation = v),
-        ],
-      ),
-    );
-  }
-
-  Widget _editableField(String label, String value, ValueChanged<String> onEdit) {
-    return GestureDetector(
-      onLongPress: () => _editField(title: 'Sửa $label', initialValue: value, onSaved: onEdit),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6.0),
-        child: Row(
-          children: [
-            Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
-            Expanded(child: Text(value.isEmpty ? '(chưa có)' : value)),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nhật Ký Trồng Trọt'),
+        title: const Text(
+          '© ngxxfus',
+          style: TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: const Color(0xFF006A71),
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(text: 'Tab 0'),
-            Tab(text: 'Tab 1'),
-            Tab(text: 'Tab 2'),
+            Tab(child: Text('Nhật ký', style: TextStyle(color: Colors.white))),
+            Tab(child: Text('Nhà kho', style: TextStyle(color: Colors.white))),
+            Tab(
+              child: Text(
+                'Thiết lập kho',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
           ],
         ),
       ),
+
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Tab 0: flashcards
-          PageView.builder(
-            itemCount: entries.length,
-            itemBuilder: (context, index) => _buildFlashCard(entries[index]),
+          /// TAB 0 --------------------------------------------------------------- ///
+          LogbookTab(
+            entries: entries,
+            pageController: _pageController,
+            currentPage: _currentPage,
+            onPageChanged: (index) {
+              setState(() {
+                _currentPage = index;
+              });
+            },
+            onAddEntry: () {
+              setState(() {
+                entries.add(FarmingLogEntry());
+                _pageController.jumpToPage(entries.length - 1);
+                _currentPage = entries.length - 1;
+              });
+            },
           ),
-          // Tab 1: chưa xử lý
-          const Center(child: Text('Tab 1 - Chưa phát triển')),
-          // Tab 2: chưa xử lý
-          const Center(child: Text('Tab 2 - Chưa phát triển')),
+
+          /// TAB 1 --------------------------------------------------------------- ///
+          Container(
+            alignment: Alignment.topCenter,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ProductTable(
+                  products: productsList,
+                  heightTable: MediaQuery.of(context).size.height - 251,
+                  onEditClicked: (int index) async {
+                    // Navigate to ProductProperties and wait for the result
+                    final result = await Navigator.pushNamed(
+                      context,
+                      '/productProperties',
+                      arguments: index, // Pass the index
+                    );
+
+                    // Handle the returned updatedProduct
+                    if (result is Product) {
+                      setState(() {
+                        productsList.removeByIndex(index);
+                        productsList.addProduct(result);
+                      });
+                      // Show confirmation
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Sản phẩm đã được cập nhật'),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  onRemoveClicked: (int index) {
+                    setState(() {
+                      productsList.removeByIndex(index);
+                    });
+                  },
+                  onSortByImportTimeAscending: () {
+                    setState(() {
+                      productsList.sortByImportTimeAscending();
+                    });
+                  },
+                  onSortByImportTimeDescending: () {
+                    setState(() {
+                      productsList.sortByImportTimeDescending();
+                    });
+                  },
+                  onSortByInfoAscending: () {
+                    setState(() {
+                      productsList.sortByInfoAscending();
+                    });
+                  },
+                  onSortByInfoDescending: () {
+                    setState(() {
+                      productsList.sortByInfoDescending();
+                    });
+                  },
+                  onSortByNameAscending: () {
+                    setState(() {
+                      productsList.sortByNameAscending();
+                    });
+                  },
+                  onSortByNameDescending: () {
+                    setState(() {
+                      productsList.sortByNameDescending();
+                    });
+                  },
+                  onSortByCategoryAscending: () {
+                    setState(() {
+                      productsList.sortByCategoryAscending();
+                    });
+                  },
+                  onSortByCategoryDescending: () {
+                    setState(() {
+                      productsList.sortByCategoryDescending();
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed:
+                            () => Navigator.pushNamed(context, '/scanQRCode'),
+                        child: const Text(
+                          'Quét mã QR',
+                          style: TextStyle(color: Color(0xFF006A71)),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed:
+                            () => Navigator.pushNamed(
+                              context,
+                              '/productsReport',
+                              arguments: productsList,
+                            ),
+                        child: const Text(
+                          'Thống kê',
+                          style: TextStyle(color: Color(0xFF006A71)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+
+          /// TAB 2 --------------------------------------------------------------- ///
+          SettingsUtilitiesScreen(productsList: productsList),
         ],
       ),
     );

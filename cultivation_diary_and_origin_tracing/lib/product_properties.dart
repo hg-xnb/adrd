@@ -24,7 +24,7 @@ class _ProductPropertiesState extends State<ProductProperties> {
   void initState() {
     super.initState();
     // Fetch the product using the index
-    product = productList.getElementAtIndex(widget.index);
+    product = productsList.getElementAtIndex(widget.index);
     if (product == null) {
       // Handle case where product is null (e.g., invalid index)
       WidgetsBinding.instance.addPostFrameCallback((_) {
