@@ -44,6 +44,26 @@ class _LogbookTabState extends State<LogbookTab> {
     return days;
   }
 
+  @override
+  void initState() {
+    super.initState();
+    // Add scroll listener to sync card navigator with scrolling
+    _cardScrollController.addListener(() {
+      if (_cardScrollController.hasClients) {
+        final offset = _cardScrollController.offset;
+        // Approximate card height (adjust if needed)
+        const cardHeight = 400.0;
+        final totalCards = _groupedEntries[_uniqueDays[widget.currentPage]]?.length ?? 0;
+        final newIndex = (offset / cardHeight).round().clamp(0, totalCards > 0 ? totalCards - 1 : 0);
+        if (newIndex != _currentCardIndex) {
+          setState(() {
+            _currentCardIndex = newIndex;
+          });
+        }
+      }
+    });
+  }
+
   Future<void> _editField({
     required String title,
     required String initialValue,
@@ -510,7 +530,6 @@ class _LogbookTabState extends State<LogbookTab> {
                         tooltip: 'Thêm ngày mới',
                         onPressed: () {
                           setState(() {
-                            // Use current date or next day if there are existing entries
                             final newDate = _uniqueDays.isEmpty
                                 ? DateTime.now()
                                 : _uniqueDays.first.add(const Duration(days: 1));
@@ -518,7 +537,6 @@ class _LogbookTabState extends State<LogbookTab> {
                               entryDateTime: newDate,
                             );
                             widget.entries.add(newEntry);
-                            // Wait for state to update
                             WidgetsBinding.instance.addPostFrameCallback((_) {
                               if (_uniqueDays.isNotEmpty) {
                                 widget.pageController.jumpToPage(_uniqueDays.length - 1);
