@@ -1,337 +1,506 @@
 import 'package:collection/collection.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
-import 'new_definations.dart';
 
-class ProductsReportScreen extends StatefulWidget {
-  final ProductsList products;
+/// ------------------------------------------------------------------- ///
 
-  const ProductsReportScreen({super.key, required this.products});
+class Product {
+  String? name;
+  String? origin;
+  String? info;
+  double? price;
+  String? productID;
+  String? category;
+  DateTime? importTime;
+  DateTime? exportTime;
+  
+  double? quantity;
+  String? quantityUnit;
+
+  String? cultivationInfo;     // Thông tin canh tác
+  String? productProperties;   // Tính chất sản phẩm
+
+  // Constructor
+  Product({
+    this.name,
+    this.origin,
+    this.info,
+    this.price,
+    this.productID,
+    this.category,
+    this.importTime,
+    this.exportTime,
+    this.quantity,
+    this.quantityUnit,
+    this.cultivationInfo,
+    this.productProperties,
+  }) {
+    productID = productID ?? _generateProductID();
+    name = name ?? 'new-$productID';
+    importTime = importTime ?? DateTime.now();
+    quantity = quantity ?? 0;
+  }
+
+  String _generateProductID() {
+    final now = DateTime.now();
+    final year = now.year.toString().substring(2);
+    final month = now.month.toString().padLeft(2, '0');
+    final day = now.day.toString().padLeft(2, '0');
+    final hour = now.hour.toString().padLeft(2, '0');
+    final minute = now.minute.toString().padLeft(2, '0');
+    final second = now.second.toString().padLeft(2, '0');
+    return '$year$month$day$hour$minute$second';
+  }
+
+  String? get id => productID;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'origin': origin,
+      'info': info,
+      'price': price,
+      'productID': productID,
+      'category': category,
+      'importTime': importTime?.toIso8601String(),
+      'exportTime': exportTime?.toIso8601String(),
+      'quantity': quantity,
+      'quantityUnit': quantityUnit,
+      'cultivationInfo': cultivationInfo,
+      'productProperties': productProperties,
+    };
+  }
+
+  factory Product.fromMap(Map<String, dynamic> map) {
+    return Product(
+      name: map['name'],
+      origin: map['origin'],
+      info: map['info'],
+      price: map['price']?.toDouble(),
+      productID: map['productID'],
+      category: map['category'],
+      importTime: map['importTime'] != null ? DateTime.parse(map['importTime']) : null,
+      exportTime: map['exportTime'] != null ? DateTime.parse(map['exportTime']) : null,
+      quantity: map['quantity'],
+      quantityUnit: map['quantityUnit'],
+      cultivationInfo: map['cultivationInfo'],
+      productProperties: map['productProperties'],
+    );
+  }
 
   @override
-  State<ProductsReportScreen> createState() => _ProductsReportScreenState();
+  String toString() {
+    return 'Product{name: $name, origin: $origin, info: $info, price: $price, productID: $productID, category: $category, importTime: $importTime, exportTime: $exportTime, quantity: $quantity, quantityUnit: $quantityUnit, cultivationInfo: $cultivationInfo, productProperties: $productProperties}';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Product &&
+          runtimeType == other.runtimeType &&
+          productID == other.productID;
+
+  @override
+  int get hashCode => productID.hashCode;
 }
 
-class _ProductsReportScreenState extends State<ProductsReportScreen> {
-  String _groupBy = 'Month';
-  DateTime? _startDate;
-  DateTime? _endDate;
 
-  Map<String, Map<String, Map<String, num>>> _groupedData() {
-    Map<String, Map<String, Map<String, num>>> grouped = {};
+class ProductsList {
+  final List<Product> _products = [];
 
-    for (var product in widget.products.allProducts) {
-      if (product.importTime == null && product.exportTime == null) continue;
-
-      void addTime(DateTime? time, String type) {
-        if (time == null) return;
-
-        if (_groupBy == 'Day') {
-          if (_startDate != null && time.isBefore(_startDate!)) return;
-          if (_endDate != null && time.isAfter(_endDate!)) return;
-        }
-
-        String key;
-        if (_groupBy == 'Day') {
-          key = DateFormat('yyyy-MM-dd').format(time);
-        } else if (_groupBy == 'Week') {
-          String weekOfYear = DateFormat('w').format(time).padLeft(2, '0');
-          key = '${time.year}-W$weekOfYear';
-        } else if (_groupBy == 'Month') {
-          key = DateFormat('yyyy-MM').format(time);
-        } else if (_groupBy == 'Year') {
-          key = DateFormat('yyyy').format(time);
-        } else {
-          key = DateFormat('yyyy-MM').format(time);
-        }
-
-        grouped[key] ??= {};
-        var productName = product.name;
-        grouped[key]![productName] ??= {'import': 0, 'export': 0, 'left': 0};
-        grouped[key]![productName]![type] =
-            (grouped[key]![productName]![type] ?? 0) + (product.quantity ?? 1);
-      }
-
-      addTime(product.importTime, 'import');
-      addTime(product.exportTime, 'export');
+  // Constructor that initializes with a list of products
+  ProductsList({List<Product>? initialProducts}) {
+    if (initialProducts != null) {
+      _products.addAll(initialProducts);
     }
-
-    var sortedKeys = grouped.keys.toList()..sort((a, b) => a.compareTo(b));
-
-    // Tính tồn kho tích lũy cho từng loại sản phẩm
-    Map<String, num> cumulativeLeftPerProduct = {};
-    for (var key in sortedKeys) {
-      for (var productName in grouped[key]!.keys) {
-        var entry = grouped[key]![productName]!;
-        cumulativeLeftPerProduct[productName] =
-            (cumulativeLeftPerProduct[productName] ?? 0) +
-                (entry['import'] ?? 0) - (entry['export'] ?? 0);
-        entry['left'] = cumulativeLeftPerProduct[productName]!;
-      }
-    }
-
-    var sortedGrouped = {
-      for (var key in sortedKeys.reversed) key: grouped[key]!,
-    };
-
-    return sortedGrouped;
   }
 
-  Future<void> _selectDate(BuildContext context, bool isStart) async {
-    final DateTime initialDate =
-        isStart ? (_startDate ?? DateTime.now()) : (_endDate ?? DateTime.now());
-    final DateTime firstDate = DateTime(2000);
-    final DateTime lastDate = DateTime(2100);
+  // Method to add a product
+  void addProduct(Product product) {
+    // Check if the product is already in the list
+    if (_products.any((p) => p.productID == product.productID)) {
+      throw ArgumentError("Product with this ID already exists");
+    }
+    _products.add(product);
+  }
 
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: firstDate,
-      lastDate: lastDate,
+  // Method to remove a product by index
+  void removeByIndex(int index) {
+    if (index < 0 || index >= _products.length) {
+      throw ArgumentError("Index out of bounds");
+    }
+    _products.removeAt(index);
+  }
+
+  // Method to delete a product by ID
+  void deleteProduct(String productID) {
+    _products.removeWhere((product) => product.productID == productID);
+  }
+
+  // Method to find a product by ID
+  Product? findProductByID(String productID) {
+    return _products.firstWhereOrNull(
+      (product) => product.productID == productID,
     );
-
-    if (picked != null) {
-      setState(() {
-        if (isStart) {
-          _startDate = picked;
-        } else {
-          _endDate = picked;
-        }
-      });
-    }
   }
 
-  void _reloadData() {
-    setState(() {
-      _startDate = null;
-      _endDate = null;
-      _groupBy = 'Month';
+  // Method to find products by name (case-insensitive)
+  List<Product> findProductsByName(String name) {
+    return _products
+        .where(
+          (product) =>
+              product.name?.toLowerCase().contains(name.toLowerCase()) ?? false,
+        )
+        .toList();
+  }
+
+  // Getter to get all products. This returns a copy to prevent external modification.
+  List<Product> get allProducts {
+    return [..._products];
+  }
+
+  // Method to get the count of each category
+  Map<String, int> getCategoryCounts() {
+    final categoryCounts = <String, int>{};
+    for (final product in _products) {
+      final category = product.category;
+      if (category != null) {
+        categoryCounts[category] = (categoryCounts[category] ?? 0) + 1;
+      }
+    }
+    return categoryCounts;
+  }
+
+  // Method to count the number of products in a specific category
+  int countProductsFromCategory(String category) {
+    return _products
+        .where(
+          (product) =>
+              product.category?.toLowerCase() == category.toLowerCase(),
+        )
+        .length;
+  }
+
+  // Getter to get the length of the product list
+  int get length => _products.length;
+
+  // Method to get a product at a specific index
+  Product? getElementAtIndex(int index) {
+    if (index >= 0 && index < _products.length) {
+      return _products[index];
+    }
+    return null; // Return null if the index is out of bounds
+  }
+
+  // Sorting methods to match ProductTable's onSort callbacks
+  void sortByNameAscending() {
+    _products.sort((a, b) {
+      final aName = a.name ?? '';
+      final bName = b.name ?? '';
+      return aName.compareTo(bName);
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final data = _groupedData();
-    final totalGoods = widget.products.length;
+  void sortByNameDescending() {
+    _products.sort((a, b) {
+      final aName = a.name ?? '';
+      final bName = b.name ?? '';
+      return bName.compareTo(aName);
+    });
+  }
 
-    // Collect all unique product names for consistent bar positioning
-    final productNames = data.values
-        .expand((entry) => entry.keys)
-        .toSet()
-        .toList()
-      ..sort();
+  void sortByImportTimeAscending() {
+    _products.sort((a, b) {
+      final aTime = a.importTime ?? DateTime(0);
+      final bTime = b.importTime ?? DateTime(0);
+      return aTime.compareTo(bTime);
+    });
+  }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Thống kê sản phẩm',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-        ),
-        backgroundColor: const Color(0xFF006A71),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Total goods: $totalGoods',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const Text('Group by: '),
-                const SizedBox(width: 8),
-                DropdownButton<String>(
-                  value: _groupBy,
-                  items: ['Day', 'Week', 'Month', 'Year']
-                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                      .toList(),
-                  onChanged: (val) {
-                    if (val != null) {
-                      setState(() {
-                        _groupBy = val;
-                        _startDate = null;
-                        _endDate = null;
-                      });
-                    }
-                  },
-                ),
-                const SizedBox(width: 16),
-                ElevatedButton.icon(
-                  onPressed: _reloadData,
-                  icon: const Icon(Icons.refresh, size: 20),
-                  label: const Text('Reload'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF006A71),
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (_groupBy == 'Day')
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _selectDate(context, true),
-                      child: AbsorbPointer(
-                        child: TextFormField(
-                          decoration: const InputDecoration(
-                            labelText: 'Start Date',
-                            hintText: 'Select start date',
-                            suffixIcon: Icon(Icons.calendar_today),
-                          ),
-                          controller: TextEditingController(
-                            text: _startDate != null
-                                ? DateFormat('yyyy-MM-dd').format(_startDate!)
-                                : '',
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => _selectDate(context, false),
-                      child: AbsorbPointer(
-                        child: TextFormField(
-                          decoration: const InputDecoration(
-                            labelText: 'End Date',
-                            hintText: 'Select end date',
-                            suffixIcon: Icon(Icons.calendar_today),
-                          ),
-                          controller: TextEditingController(
-                            text: _endDate != null
-                                ? DateFormat('yyyy-MM-dd').format(_endDate!)
-                                : '',
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  height: 300,
-                  width: data.length * (productNames.length * 16 + 60),
-                  child: BarChart(
-                    BarChartData(
-                      alignment: BarChartAlignment.spaceAround,
-                      groupsSpace: 30,
-                      barTouchData: BarTouchData(enabled: false),
-                      barGroups: data.entries.mapIndexed((index, entry) {
-                        return BarChartGroupData(
-                          x: index,
-                          barsSpace: 4,
-                          barRods: productNames.map((productName) {
-                            final value = entry.value[productName]?['import'] ?? 0;
-                            return BarChartRodData(
-                              toY: value.toDouble(),
-                              color: Colors.blue,
-                              width: 10,
-                              borderRadius: BorderRadius.circular(4),
-                            );
-                          }).toList(),
-                        );
-                      }).toList(),
-                      titlesData: FlTitlesData(
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 60,
-                            getTitlesWidget: (double value, TitleMeta meta) {
-                              if (value.toInt() >= data.keys.length) return Container();
-                              return Transform.rotate(
-                                angle: -0.5,
-                                child: Text(
-                                  data.keys.elementAt(value.toInt()),
-                                  style: const TextStyle(fontSize: 10),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 40,
-                            interval: 1,
-                            getTitlesWidget: (value, meta) {
-                              if (value % 1 == 0) {
-                                return Text(
-                                  value.toInt().toString(),
-                                  style: const TextStyle(fontSize: 10),
-                                );
-                              } else {
-                                return const SizedBox.shrink();
-                              }
-                            },
-                          ),
-                        ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                      ),
-                      gridData: FlGridData(
-                        show: true,
-                        drawVerticalLine: false,
-                        drawHorizontalLine: true,
-                        getDrawingHorizontalLine: (value) => FlLine(
-                          color: Colors.grey.withAlpha((0.5 * 255).toInt()),
-                          strokeWidth: 1,
-                        ),
-                      ),
-                      borderData: FlBorderData(
-                        show: true,
-                        border: const Border(
-                          left: BorderSide(),
-                          bottom: BorderSide(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const Row(
-              children: [
-                LegendItem(color: Colors.blue, text: 'Import'),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+  void sortByImportTimeDescending() {
+    _products.sort((a, b) {
+      final aTime = a.importTime ?? DateTime(0);
+      final bTime = b.importTime ?? DateTime(0);
+      return bTime.compareTo(aTime);
+    });
+  }
+
+  void sortByInfoAscending() {
+    _products.sort((a, b) {
+      final aInfo = a.info ?? '';
+      final bInfo = b.info ?? '';
+      return aInfo.compareTo(bInfo);
+    });
+  }
+
+  void sortByInfoDescending() {
+    _products.sort((a, b) {
+      final aInfo = a.info ?? '';
+      final bInfo = b.info ?? '';
+      return bInfo.compareTo(aInfo);
+    });
+  }
+
+  void sortByCategoryAscending() {
+    _products.sort((a, b) {
+      final aCategory = a.category ?? '';
+      final bCategory = b.category ?? '';
+      return aCategory.compareTo(bCategory);
+    });
+  }
+
+  void sortByCategoryDescending() {
+    _products.sort((a, b) {
+      final aCategory = a.category ?? '';
+      final bCategory = b.category ?? '';
+      return bCategory.compareTo(aCategory);
+    });
+  }
+
+  void sortByAmountAscending() {
+    _products.sort((a, b) => (a.quantity ?? 0).compareTo(b.quantity ?? 0));
+  }
+
+  void sortByAmountDescending() {
+    _products.sort((a, b) => (b.quantity ?? 0).compareTo(a.quantity ?? 0));
   }
 }
 
-class LegendItem extends StatelessWidget {
-  final Color color;
-  final String text;
+List<Product> allProducts = [
+  // 10 sản phẩm cố định đầu tiên
+  Product(
+    name: "Cà chua",
+    origin: "Việt Nam",
+    info: "Rau quả sạch, giàu vitamin C",
+    price: 15000.0,
+    productID: "250503100001",
+    category: "Rau củ",
+    importTime: DateTime(2025, 4, 10, 7, 30),
+    exportTime: DateTime(2025, 4, 20, 16, 0),
+    quantity: 100,
+    cultivationInfo: "Trồng hữu cơ, không thuốc trừ sâu",
+    productProperties: "Chín mọng, màu đỏ tươi",
+  ),
+  Product(
+    name: "Cải bó xôi",
+    origin: "Đà Lạt",
+    info: "Tươi xanh, thích hợp cho món xào hoặc salad",
+    price: 20000.0,
+    productID: "250503100002",
+    category: "Rau lá",
+    importTime: DateTime(2025, 4, 12, 8, 15),
+    exportTime: DateTime(2025, 4, 22, 17, 0),
+    quantity: 80,
+    cultivationInfo: "Trồng trong nhà kính",
+    productProperties: "Lá dày, giàu sắt",
+  ),
+  Product(
+    name: "Khoai tây",
+    origin: "Lâm Đồng",
+    info: "Củ đều, vỏ mỏng, ngọt bùi",
+    price: 18000.0,
+    productID: "250503100003",
+    category: "Củ",
+    importTime: DateTime(2025, 4, 8, 6, 45),
+    exportTime: DateTime(2025, 4, 19, 14, 30),
+    quantity: 150,
+    cultivationInfo: "Trồng ở cao nguyên",
+    productProperties: "Củ chắc, không sâu bệnh",
+  ),
+  Product(
+    name: "Cà rốt",
+    origin: "Hà Nội",
+    info: "Giàu beta-carotene, củ lớn đều",
+    price: 16000.0,
+    productID: "250503100004",
+    category: "Củ",
+    importTime: DateTime(2025, 4, 9, 7, 0),
+    exportTime: DateTime(2025, 4, 21, 15, 45),
+    quantity: 120,
+    cultivationInfo: "Tưới tiêu nhỏ giọt",
+    productProperties: "Màu cam đậm, giòn",
+  ),
+  Product(
+    name: "Xà lách",
+    origin: "Đà Lạt",
+    info: "Giòn, tươi, phù hợp làm salad",
+    price: 12000.0,
+    productID: "250503100005",
+    category: "Rau lá",
+    importTime: DateTime(2025, 4, 11, 8, 0),
+    exportTime: DateTime(2025, 4, 23, 16, 15),
+    quantity: 70,
+    cultivationInfo: "Không dùng phân hóa học",
+    productProperties: "Lá xoăn, vị dịu",
+  ),
+  Product(
+    name: "Hành lá",
+    origin: "Hưng Yên",
+    info: "Gia vị không thể thiếu trong bữa ăn",
+    price: 10000.0,
+    productID: "250503100006",
+    category: "Gia vị",
+    importTime: DateTime(2025, 4, 10, 6, 30),
+    exportTime: DateTime(2025, 4, 20, 13, 20),
+    quantity: 60,
+    cultivationInfo: "Tưới nước sông sạch",
+    productProperties: "Thân trắng, lá dài",
+  ),
+  Product(
+    name: "Ớt chuông đỏ",
+    origin: "Đà Lạt",
+    info: "Màu đẹp, vị ngọt, ít cay",
+    price: 25000.0,
+    productID: "250503100007",
+    category: "Rau củ",
+    importTime: DateTime(2025, 4, 13, 9, 30),
+    exportTime: DateTime(2025, 4, 24, 17, 45),
+    quantity: 90,
+    cultivationInfo: "Trồng bằng phân vi sinh",
+    productProperties: "Màu đỏ đậm, giòn",
+  ),
+  Product(
+    name: "Bí đỏ",
+    origin: "Quảng Nam",
+    info: "Ngọt, dẻo, phù hợp nấu canh hoặc chè",
+    price: 14000.0,
+    productID: "250503100008",
+    category: "Củ quả",
+    importTime: DateTime(2025, 4, 7, 7, 15),
+    exportTime: DateTime(2025, 4, 18, 12, 50),
+    quantity: 110,
+    cultivationInfo: "Không phun thuốc bảo vệ thực vật",
+    productProperties: "Vỏ xanh, ruột vàng",
+  ),
+  Product(
+    name: "Đậu que",
+    origin: "Long An",
+    info: "Giòn, non, phù hợp luộc/xào",
+    price: 17000.0,
+    productID: "250503100009",
+    category: "Đậu",
+    importTime: DateTime(2025, 4, 14, 10, 0),
+    exportTime: DateTime(2025, 4, 25, 15, 30),
+    quantity: 85,
+    cultivationInfo: "Tưới tiêu nhỏ giọt, không phân hóa học",
+    productProperties: "Màu xanh bóng, hạt nhỏ",
+  ),
+  Product(
+    name: "Su su",
+    origin: "Sapa",
+    info: "Trái su su non, giòn, ngọt",
+    price: 13000.0,
+    productID: "250503100010",
+    category: "Rau củ",
+    importTime: DateTime(2025, 4, 6, 6, 0),
+    exportTime: DateTime(2025, 4, 17, 11, 15),
+    quantity: 95,
+    cultivationInfo: "Trồng ở vùng núi cao, khí hậu lạnh",
+    productProperties: "Vỏ xanh nhạt, không xơ",
+  ),
 
-  const LegendItem({super.key, required this.color, required this.text});
+  // Tạo sản phẩm từ 11 đến 100 với giá trị mẫu ngẫu nhiên
+  for (int i = 11; i <= 100; i++)
+    Product(
+      name: [
+        "Bí xanh",
+        "Cải ngọt",
+        "Cải thảo",
+        "Rau muống",
+        "Rau dền",
+        "Rau mồng tơi",
+        "Đậu bắp",
+        "Hành tím",
+        "Tỏi",
+        "Gừng",
+      ][i % 10],
+      origin: ["Đà Lạt", "Lâm Đồng", "Hưng Yên", "Cần Thơ", "Quảng Nam"][i % 5],
+      info: "Nông sản tươi sạch số $i",
+      price: double.parse(((i * 1.1 + 10) * 1000).toStringAsFixed(0)),
+      productID: DateTime.now().millisecondsSinceEpoch.toString() + i.toString(),
+      category: ["Rau lá", "Củ", "Gia vị", "Rau củ", "Đậu"][i % 5],
+      importTime: DateTime(
+        2023 + (i % 2),
+        i % 12 + 1,
+        i % 28 + 1,
+        i % 24,
+        i % 60,
+      ),
+      exportTime: DateTime(
+        2024 + (i % 2),
+        i % 12 + 1,
+        i % 28 + 1,
+        (i + 1) % 24,
+        (i + 10) % 60,
+      ),
+      quantity: 50 + (i % 100),
+      cultivationInfo: "Canh tác tự nhiên số $i",
+      productProperties: "Chất lượng cao số $i",
+    ),
+];
 
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(width: 16, height: 16, color: color),
-        const SizedBox(width: 4),
-        Text(text),
-      ],
+ProductsList productsList = ProductsList(initialProducts: allProducts);
+
+List<Map<String, double>> runningConfig = [
+  {"ac": 12.0},
+];
+
+
+/// ------------------------------------------------------------------- ///
+class FarmingLogEntry {
+  List<File> images = [];
+  int currentImageIndex = 0;
+  DateTime entryDateTime;
+  String cropVariety;
+  String care;
+  String fertilizing;
+  String spraying;
+  int wateringAmount;
+  String wateringNote;
+  DateTime? harvestTime;
+  String harvestNote;
+  String preservation;
+
+  FarmingLogEntry({
+    DateTime? entryDateTime,
+    this.cropVariety = '',
+    this.care = '',
+    this.fertilizing = '',
+    this.spraying = '',
+    this.wateringAmount = 0,
+    this.wateringNote = '',
+    this.harvestTime,
+    this.harvestNote = '',
+    this.preservation = '',
+  }) : entryDateTime = entryDateTime ?? DateTime.now();
+
+  Future<void> pickImage(BuildContext context) async {
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder:
+          (ctx) => SimpleDialog(
+            title: const Text('Chọn nguồn ảnh'),
+            children: [
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(ctx, ImageSource.camera),
+                child: const Text('Chụp ảnh'),
+              ),
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(ctx, ImageSource.gallery),
+                child: const Text('Thư viện'),
+              ),
+            ],
+          ),
     );
+
+    if (source != null) {
+      final picked = await ImagePicker().pickImage(source: source);
+      if (picked != null) {
+        images.add(File(picked.path));
+      }
+    }
   }
+
+  File? get currentImage => images.isEmpty ? null : images[currentImageIndex];
 }
