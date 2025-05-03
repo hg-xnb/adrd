@@ -14,10 +14,14 @@ class Product {
   String? category;
   DateTime? importTime;
   DateTime? exportTime;
+  
   double? quantity;
   String? quantityUnit;
 
-  // Default constructor
+  String? cultivationInfo;     // Thông tin canh tác
+  String? productProperties;   // Tính chất sản phẩm
+
+  // Constructor
   Product({
     this.name,
     this.origin,
@@ -27,16 +31,14 @@ class Product {
     this.category,
     this.importTime,
     this.exportTime,
-    this.quantity, // Gán quantity
+    this.quantity,
+    this.quantityUnit,
+    this.cultivationInfo,
+    this.productProperties,
   }) {
     productID = productID ?? _generateProductID();
     name = name ?? 'new-$productID';
-    origin = origin;
-    info = info;
-    price = price;
-    category = category;
     importTime = importTime ?? DateTime.now();
-    exportTime = exportTime;
     quantity = quantity ?? 0;
   }
 
@@ -63,7 +65,10 @@ class Product {
       'category': category,
       'importTime': importTime?.toIso8601String(),
       'exportTime': exportTime?.toIso8601String(),
-      'quantity': quantity, // Thêm vào map
+      'quantity': quantity,
+      'quantityUnit': quantityUnit,
+      'cultivationInfo': cultivationInfo,
+      'productProperties': productProperties,
     };
   }
 
@@ -75,17 +80,18 @@ class Product {
       price: map['price']?.toDouble(),
       productID: map['productID'],
       category: map['category'],
-      importTime:
-          map['importTime'] != null ? DateTime.parse(map['importTime']) : null,
-      exportTime:
-          map['exportTime'] != null ? DateTime.parse(map['exportTime']) : null,
-      quantity: map['quantity'], // Parse quantity từ map
+      importTime: map['importTime'] != null ? DateTime.parse(map['importTime']) : null,
+      exportTime: map['exportTime'] != null ? DateTime.parse(map['exportTime']) : null,
+      quantity: map['quantity'],
+      quantityUnit: map['quantityUnit'],
+      cultivationInfo: map['cultivationInfo'],
+      productProperties: map['productProperties'],
     );
   }
 
   @override
   String toString() {
-    return 'Product{name: $name, origin: $origin, info: $info, price: $price, productID: $productID, category: $category, importTime: $importTime, exportTime: $exportTime, quantity: $quantity}';
+    return 'Product{name: $name, origin: $origin, info: $info, price: $price, productID: $productID, category: $category, importTime: $importTime, exportTime: $exportTime, quantity: $quantity, quantityUnit: $quantityUnit, cultivationInfo: $cultivationInfo, productProperties: $productProperties}';
   }
 
   @override
@@ -98,6 +104,7 @@ class Product {
   @override
   int get hashCode => productID.hashCode;
 }
+
 
 class ProductsList {
   final List<Product> _products = [];
@@ -272,6 +279,8 @@ List<Product> allProducts = [
     importTime: DateTime(2025, 4, 10, 7, 30),
     exportTime: DateTime(2025, 4, 20, 16, 0),
     quantity: 100,
+    cultivationInfo: "Trồng hữu cơ, không thuốc trừ sâu",
+    productProperties: "Chín mọng, màu đỏ tươi",
   ),
   Product(
     name: "Cải bó xôi",
@@ -283,6 +292,8 @@ List<Product> allProducts = [
     importTime: DateTime(2025, 4, 12, 8, 15),
     exportTime: DateTime(2025, 4, 22, 17, 0),
     quantity: 80,
+    cultivationInfo: "Trồng trong nhà kính",
+    productProperties: "Lá dày, giàu sắt",
   ),
   Product(
     name: "Khoai tây",
@@ -294,6 +305,8 @@ List<Product> allProducts = [
     importTime: DateTime(2025, 4, 8, 6, 45),
     exportTime: DateTime(2025, 4, 19, 14, 30),
     quantity: 150,
+    cultivationInfo: "Trồng ở cao nguyên",
+    productProperties: "Củ chắc, không sâu bệnh",
   ),
   Product(
     name: "Cà rốt",
@@ -305,6 +318,8 @@ List<Product> allProducts = [
     importTime: DateTime(2025, 4, 9, 7, 0),
     exportTime: DateTime(2025, 4, 21, 15, 45),
     quantity: 120,
+    cultivationInfo: "Tưới tiêu nhỏ giọt",
+    productProperties: "Màu cam đậm, giòn",
   ),
   Product(
     name: "Xà lách",
@@ -316,6 +331,8 @@ List<Product> allProducts = [
     importTime: DateTime(2025, 4, 11, 8, 0),
     exportTime: DateTime(2025, 4, 23, 16, 15),
     quantity: 70,
+    cultivationInfo: "Không dùng phân hóa học",
+    productProperties: "Lá xoăn, vị dịu",
   ),
   Product(
     name: "Hành lá",
@@ -327,6 +344,8 @@ List<Product> allProducts = [
     importTime: DateTime(2025, 4, 10, 6, 30),
     exportTime: DateTime(2025, 4, 20, 13, 20),
     quantity: 60,
+    cultivationInfo: "Tưới nước sông sạch",
+    productProperties: "Thân trắng, lá dài",
   ),
   Product(
     name: "Ớt chuông đỏ",
@@ -338,6 +357,8 @@ List<Product> allProducts = [
     importTime: DateTime(2025, 4, 13, 9, 30),
     exportTime: DateTime(2025, 4, 24, 17, 45),
     quantity: 90,
+    cultivationInfo: "Trồng bằng phân vi sinh",
+    productProperties: "Màu đỏ đậm, giòn",
   ),
   Product(
     name: "Bí đỏ",
@@ -349,6 +370,8 @@ List<Product> allProducts = [
     importTime: DateTime(2025, 4, 7, 7, 15),
     exportTime: DateTime(2025, 4, 18, 12, 50),
     quantity: 110,
+    cultivationInfo: "Không phun thuốc bảo vệ thực vật",
+    productProperties: "Vỏ xanh, ruột vàng",
   ),
   Product(
     name: "Đậu que",
@@ -360,6 +383,8 @@ List<Product> allProducts = [
     importTime: DateTime(2025, 4, 14, 10, 0),
     exportTime: DateTime(2025, 4, 25, 15, 30),
     quantity: 85,
+    cultivationInfo: "Tưới tiêu nhỏ giọt, không phân hóa học",
+    productProperties: "Màu xanh bóng, hạt nhỏ",
   ),
   Product(
     name: "Su su",
@@ -371,36 +396,36 @@ List<Product> allProducts = [
     importTime: DateTime(2025, 4, 6, 6, 0),
     exportTime: DateTime(2025, 4, 17, 11, 15),
     quantity: 95,
+    cultivationInfo: "Trồng ở vùng núi cao, khí hậu lạnh",
+    productProperties: "Vỏ xanh nhạt, không xơ",
   ),
 
-  // Tạo sản phẩm từ 11 đến 100
+  // Tạo sản phẩm từ 11 đến 100 với giá trị mẫu ngẫu nhiên
   for (int i = 11; i <= 100; i++)
     Product(
-      name:
-          [
-            "Bí xanh",
-            "Cải ngọt",
-            "Cải thảo",
-            "Rau muống",
-            "Rau dền",
-            "Rau mồng tơi",
-            "Đậu bắp",
-            "Hành tím",
-            "Tỏi",
-            "Gừng",
-          ][i % 10],
+      name: [
+        "Bí xanh",
+        "Cải ngọt",
+        "Cải thảo",
+        "Rau muống",
+        "Rau dền",
+        "Rau mồng tơi",
+        "Đậu bắp",
+        "Hành tím",
+        "Tỏi",
+        "Gừng",
+      ][i % 10],
       origin: ["Đà Lạt", "Lâm Đồng", "Hưng Yên", "Cần Thơ", "Quảng Nam"][i % 5],
       info: "Nông sản tươi sạch số $i",
       price: double.parse(((i * 1.1 + 10) * 1000).toStringAsFixed(0)),
-      productID:
-          DateTime.now().millisecondsSinceEpoch.toString() + i.toString(),
+      productID: DateTime.now().millisecondsSinceEpoch.toString() + i.toString(),
       category: ["Rau lá", "Củ", "Gia vị", "Rau củ", "Đậu"][i % 5],
       importTime: DateTime(
         2023 + (i % 2),
         i % 12 + 1,
         i % 28 + 1,
         i % 24,
-        i % 60
+        i % 60,
       ),
       exportTime: DateTime(
         2024 + (i % 2),
@@ -409,7 +434,9 @@ List<Product> allProducts = [
         (i + 1) % 24,
         (i + 10) % 60,
       ),
-      quantity: 50 + (i % 100), // số lượng 50–149 kg
+      quantity: 50 + (i % 100),
+      cultivationInfo: "Canh tác tự nhiên số $i",
+      productProperties: "Chất lượng cao số $i",
     ),
 ];
 

@@ -18,19 +18,22 @@ class _ProductPropertiesState extends State<ProductProperties> {
   late TextEditingController _categoryController;
   late TextEditingController _importTimeController;
   late TextEditingController _exportTimeController;
+  late TextEditingController _quantityController;
+  late TextEditingController _quantityUnitController;
+  late TextEditingController _cultivationInfoController;
+  late TextEditingController _productPropertiesController;
+
   late Product? product;
 
   @override
   void initState() {
     super.initState();
-    // Fetch the product using the index
     product = productsList.getElementAtIndex(widget.index);
+
     if (product == null) {
-      // Handle case where product is null (e.g., invalid index)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pop(context);
       });
-      // Initialize with empty controllers
       _nameController = TextEditingController();
       _originController = TextEditingController();
       _infoController = TextEditingController();
@@ -38,35 +41,31 @@ class _ProductPropertiesState extends State<ProductProperties> {
       _categoryController = TextEditingController();
       _importTimeController = TextEditingController();
       _exportTimeController = TextEditingController();
+      _quantityController = TextEditingController();
+      _quantityUnitController = TextEditingController();
+      _cultivationInfoController = TextEditingController();
+      _productPropertiesController = TextEditingController();
     } else {
-      // Initialize controllers with existing product data
-      _nameController = TextEditingController(text: product!.name ?? '');
-      _originController = TextEditingController(text: product!.origin ?? '');
-      _infoController = TextEditingController(text: product!.info ?? '');
-      _priceController = TextEditingController(
-        text: product!.price?.toString() ?? '',
-      );
-      _categoryController = TextEditingController(
-        text: product!.category ?? '',
-      );
+      _nameController = TextEditingController(text: product!.name ?? 'N/A');
+      _originController = TextEditingController(text: product!.origin ?? 'N/A');
+      _infoController = TextEditingController(text: product!.info ?? 'N/A');
+      _priceController = TextEditingController(text: product!.price?.toString() ?? 'N/A');
+      _categoryController = TextEditingController(text: product!.category ?? 'N/A');
       _importTimeController = TextEditingController(
-        text:
-            product!.importTime != null
-                ? DateFormat('yyyy-MM-dd HH:mm:ss').format(product!.importTime!)
-                : '',
+        text: product!.importTime != null ? DateFormat('yyyy-MM-dd HH:mm:ss').format(product!.importTime!) : '',
       );
       _exportTimeController = TextEditingController(
-        text:
-            product!.exportTime != null
-                ? DateFormat('yyyy-MM-dd HH:mm:ss').format(product!.exportTime!)
-                : '',
+        text: product!.exportTime != null ? DateFormat('yyyy-MM-dd HH:mm:ss').format(product!.exportTime!) : '',
       );
+      _quantityController = TextEditingController(text: product!.quantity?.toString() ?? 'N/A');
+      _quantityUnitController = TextEditingController(text: product!.quantityUnit ?? 'N/A');
+      _cultivationInfoController = TextEditingController(text: product!.cultivationInfo ?? 'N/A');
+      _productPropertiesController = TextEditingController(text: product!.productProperties ?? 'N/A');
     }
   }
 
   @override
   void dispose() {
-    // Dispose controllers to prevent memory leaks
     _nameController.dispose();
     _originController.dispose();
     _infoController.dispose();
@@ -74,6 +73,10 @@ class _ProductPropertiesState extends State<ProductProperties> {
     _categoryController.dispose();
     _importTimeController.dispose();
     _exportTimeController.dispose();
+    _quantityController.dispose();
+    _quantityUnitController.dispose();
+    _cultivationInfoController.dispose();
+    _productPropertiesController.dispose();
     super.dispose();
   }
 
@@ -110,58 +113,67 @@ class _ProductPropertiesState extends State<ProductProperties> {
           pickedTime.minute,
         );
 
-        controller.text = DateFormat(
-          'yyyy-MM-dd HH:mm:ss',
-        ).format(fullDateTime);
+        controller.text = DateFormat('yyyy-MM-dd HH:mm:ss').format(fullDateTime);
       }
     }
   }
 
   void _saveProduct() {
-    if (product == null) return; // Prevent saving if product is null
+    if (product == null) return;
 
     final updatedProduct = Product(
-      productID: product!.productID, // Keep original productID
-      name: _nameController.text.isEmpty ? product!.name : _nameController.text,
-      origin:
-          _originController.text.isEmpty
-              ? product!.origin
-              : _originController.text,
-      info: _infoController.text.isEmpty ? product!.info : _infoController.text,
-      price:
-          _priceController.text.isEmpty
-              ? product!.price
-              : double.tryParse(_priceController.text),
-      category:
-          _categoryController.text.isEmpty
-              ? product!.category
-              : _categoryController.text,
-      importTime:
-          _importTimeController.text.isEmpty
-              ? product!.importTime
-              : DateTime.tryParse(_importTimeController.text),
-      exportTime:
-          _exportTimeController.text.isEmpty
-              ? product!.exportTime
-              : DateTime.tryParse(_exportTimeController.text),
+      productID: product!.productID,
+      name: _nameController.text,
+      origin: _originController.text,
+      info: _infoController.text,
+      price: double.tryParse(_priceController.text),
+      category: _categoryController.text,
+      importTime: DateTime.tryParse(_importTimeController.text),
+      exportTime: DateTime.tryParse(_exportTimeController.text),
+      quantity: double.tryParse(_quantityController.text),
+      quantityUnit: _quantityUnitController.text,
+      cultivationInfo: _cultivationInfoController.text,
+      productProperties: _productPropertiesController.text,
     );
 
     Navigator.pop(context, updatedProduct);
   }
 
   void _cancel() {
-    // Discard changes and return to previous screen
     Navigator.pop(context);
+  }
+
+  Widget buildTextField({
+    required TextEditingController controller,
+    required String label,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    int maxLines = 1,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        TextFormField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: label,
+            border: const OutlineInputBorder(),
+          ),
+          readOnly: readOnly,
+          onTap: onTap,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Chỉnh Sửa Sản Phẩm',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-        ),
+        title: const Text('Chỉnh Sửa Sản Phẩm', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
         backgroundColor: const Color(0xFF006A71),
       ),
       body: Padding(
@@ -170,117 +182,46 @@ class _ProductPropertiesState extends State<ProductProperties> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Product ID (read-only)
               TextFormField(
-                initialValue: product?.productID ?? '',
+                initialValue: product?.productID ?? 'N/A',
                 decoration: const InputDecoration(
                   labelText: 'Mã Sản Phẩm',
                   border: OutlineInputBorder(),
                 ),
                 readOnly: true,
               ),
-              const SizedBox(height: 16),
-              // Name
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Tên Sản Phẩm',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Origin
-              TextFormField(
-                controller: _originController,
-                decoration: const InputDecoration(
-                  labelText: 'Xuất Xứ',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Info
-              TextFormField(
-                controller: _infoController,
-                decoration: const InputDecoration(
-                  labelText: 'Thông Tin',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Price
-              TextFormField(
-                controller: _priceController,
-                decoration: const InputDecoration(
-                  labelText: 'Giá',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              // Category
-              TextFormField(
-                controller: _categoryController,
-                decoration: const InputDecoration(
-                  labelText: 'Danh Mục',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Import Time
-              TextFormField(
+              buildTextField(controller: _nameController, label: 'Tên Sản Phẩm'),
+              buildTextField(controller: _categoryController, label: 'Danh Mục'),
+              buildTextField(controller: _productPropertiesController, label: 'Tính Chất Sản Phẩm', maxLines: 2),
+              buildTextField(controller: _cultivationInfoController, label: 'Thông Tin Canh Tác', maxLines: 2),
+              buildTextField(controller: _originController, label: 'Xuất Xứ'),
+              buildTextField(controller: _infoController, label: 'Thông Tin'),
+              buildTextField(controller: _priceController, label: 'Giá', keyboardType: TextInputType.number),
+              buildTextField(controller: _quantityUnitController, label: 'Đơn Vị'),
+              buildTextField(controller: _quantityController, label: 'Số Lượng', keyboardType: TextInputType.number),
+              buildTextField(
                 controller: _importTimeController,
-                decoration: const InputDecoration(
-                  labelText: 'Thời Gian Nhập',
-                  border: OutlineInputBorder(),
-                ),
-                readOnly: true,
-                onTap:
-                    () => _selectDateTime(
-                      context,
-                      _importTimeController,
-                      product?.importTime,
-                    ),
+                label: 'Thời Gian Nhập',
+                onTap: () => _selectDateTime(context, _importTimeController, product?.importTime),
               ),
-              const SizedBox(height: 16),
-              // Export Time
-              TextFormField(
+              buildTextField(
                 controller: _exportTimeController,
-                decoration: const InputDecoration(
-                  labelText: 'Thời Gian Xuất',
-                  border: OutlineInputBorder(),
-                ),
-                readOnly: true,
-                onTap:
-                    () => _selectDateTime(
-                      context,
-                      _exportTimeController,
-                      product?.exportTime,
-                    ),
+                label: 'Thời Gian Xuất',
+                onTap: () => _selectDateTime(context, _exportTimeController, product?.exportTime),
               ),
-
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
                     onPressed: _cancel,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[300],
-                    ),
-                    child: const Text(
-                      'Hủy',
-                      style: TextStyle(color: Colors.black),
-                    ),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[300]),
+                    child: const Text('Hủy', style: TextStyle(color: Colors.black)),
                   ),
                   ElevatedButton(
                     onPressed: product == null ? null : _saveProduct,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF006A71),
-                    ),
-                    child: const Text(
-                      'Lưu',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF006A71)),
+                    child: const Text('Lưu', style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
